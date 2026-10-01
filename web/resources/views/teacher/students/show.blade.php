@@ -28,15 +28,23 @@
             <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Current subject</p>
             <p class="mt-1 font-semibold text-slate-800">{{ $selected_subject->code }} · {{ $selected_subject->title }}</p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3">
             <span class="text-xs text-slate-400">Latest snapshot {{ $latest?->snapshot_date?->format('M d, Y') ?? 'not recorded' }}</span>
             <x-support-badge :level="$analysis?->support_level?->value ?? 'UNASSESSED'" />
+            <form method="POST" action="{{ route('teacher.students.insights.store', $student) }}" data-ai-generation-form>
+                @csrf
+                <input type="hidden" name="subject_id" value="{{ $selected_subject->id }}" />
+                <button type="submit" @disabled(! $latest) data-ai-generation-button class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition {{ $latest ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/20 hover:bg-violet-700' : 'cursor-not-allowed bg-slate-100 text-slate-400' }}">
+                    <x-icon name="sparkles" class="h-4 w-4" />
+                    <span data-ai-generation-label>{{ $study_plan['plan'] ? 'Refresh AI insights' : 'Generate AI insights' }}</span>
+                </button>
+            </form>
         </div>
     </div>
 
     @if ($errors->any())
         <div class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800" role="alert">
-            <p class="font-semibold">The performance snapshot could not be saved.</p>
+            <p class="font-semibold">The request could not be completed.</p>
             <ul class="mt-2 list-disc space-y-1 pl-5 text-xs">
                 @foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach
             </ul>

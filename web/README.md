@@ -82,6 +82,12 @@ AI_DEMO_FALLBACK=true
 
 Run `php artisan config:clear` after updating `.env`. Administrators can check readiness and test the real connection from `/admin/dashboard`. The API key is never included in health responses, logs, rendered pages, or browser requests.
 
+## Phase 8 AI insights and study plans
+
+From `/teacher/students/{student}`, an authorized teacher can generate or refresh AI support insights for a selected subject. The workflow requires a performance snapshot, sends only academic indicators to the configured AI provider, validates every returned field, and persists the explanation, weak topics, recommendations, active study plan, and seven dated plan items in one database transaction.
+
+The generation route is teacher-only, verifies active class ownership, and is rate-limited. Refreshing archives prior AI plans and replaces only pending AI recommendations; teacher-authored and in-progress guidance is preserved. The active result is visible from both the teacher analysis page and student dashboard.
+
 Run the test suite and code formatter with:
 
 ```powershell

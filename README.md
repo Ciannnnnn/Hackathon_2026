@@ -4,7 +4,7 @@ EduPulse AI is an AI-powered educational support platform for identifying studen
 
 ## Project status
 
-Phases 1 through 7 are complete. EduPulse now has a normalized demo database, secure role authentication, account provisioning, responsive role-aware dashboards, teacher performance-analysis workflows, a real Random Forest classifier, and a provider-neutral generative AI layer connected to Gemini.
+Phases 1 through 8 are complete. EduPulse now has a normalized demo database, secure role authentication, account provisioning, responsive role-aware dashboards, a real Random Forest classifier, Gemini integration, and persisted AI-generated academic explanations, recommendations, and seven-day study plans.
 
 ## Architecture
 
@@ -122,7 +122,17 @@ cd web
 php artisan config:clear
 ```
 
-Sign in as an administrator and use the **Test Gemini** control on `/admin/dashboard`. If Gemini is missing, unavailable, rate-limited, or returns malformed output, the application can use clearly marked local demo fallback content instead of crashing. Phase 8 will persist AI-generated student explanations, recommendations, and study plans.
+Sign in as an administrator and use the **Test Gemini** control on `/admin/dashboard`. If Gemini is missing, unavailable, rate-limited, or returns malformed output, the application can use clearly marked local demo fallback content instead of crashing. The Phase 8 workflow uses this layer to persist student explanations, recommendations, and study plans.
+
+## AI insights and personalized study plans
+
+Teachers can open a learner from `/teacher/students` and select **Generate AI insights** after a performance snapshot exists. EduPulse sends only subject and academic indicators to Gemini—names, email addresses, and student numbers are excluded from the prompt. The response is validated and saved as:
+
+- a concise academic-support explanation and weak-topic list;
+- prioritized recommended actions;
+- one active seven-day study plan with a dated task for each day.
+
+Refreshing insights archives the previous AI plan, replaces pending AI recommendations, and preserves teacher-created or already-in-progress guidance. Students immediately see the active plan and updated explanation on their dashboard. If Gemini is unavailable, the same workflow saves clearly reported demo fallback guidance so the hackathon flow remains usable.
 
 ## Demo data
 
@@ -147,7 +157,7 @@ EduPulse123!
 5. Performance records and student analysis - complete
 6. Python ML service and Laravel integration - complete
 7. Gemini integration - complete
-8. AI analysis and study plans
+8. AI analysis and study plans - complete
 9. PDF upload and extraction
 10. Retrieval-augmented AI tutor
 11. AI-generated quizzes

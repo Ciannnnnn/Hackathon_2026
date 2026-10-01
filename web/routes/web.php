@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredStudentController;
 use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\StudentDashboardController;
+use App\Http\Controllers\StudentInsightController;
 use App\Http\Controllers\StudentPerformanceController;
 use App\Http\Controllers\TeacherDashboardController;
 use App\Http\Controllers\TeacherStudentController;
@@ -36,6 +37,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/students/{student}', [TeacherStudentController::class, 'show'])->name('students.show');
         Route::post('/students/{student}/performance', [StudentPerformanceController::class, 'store'])
             ->name('students.performance.store');
+        Route::post('/students/{student}/ai-insights', [StudentInsightController::class, 'store'])
+            ->middleware('throttle:5,1')
+            ->name('students.insights.store');
     });
 
     Route::get('/student/dashboard', StudentDashboardController::class)

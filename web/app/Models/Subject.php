@@ -47,4 +47,9 @@ class Subject extends Model
     {
         return $this->hasMany(StudentPerformance::class);
     }
+
+    public function studyPlans(): HasMany
+    {
+        return $this->hasMany(StudyPlan::class);
+    }
 }

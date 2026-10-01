@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\SupportLevel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class StudentSupportAnalysis extends Model
 {
@@ -34,5 +35,15 @@ class StudentSupportAnalysis extends Model
     public function performance(): BelongsTo
     {
         return $this->belongsTo(StudentPerformance::class, 'performance_id');
+    }
+
+    public function recommendations(): HasMany
+    {
+        return $this->hasMany(Recommendation::class, 'support_analysis_id');
+    }
+
+    public function studyPlans(): HasMany
+    {
+        return $this->hasMany(StudyPlan::class, 'support_analysis_id');
     }
 }

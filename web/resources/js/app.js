@@ -42,6 +42,16 @@ const showRoleFields = () => {
 accountRole?.addEventListener('change', showRoleFields);
 showRoleFields();
 
+document.querySelectorAll('[data-ai-generation-form]').forEach((form) => {
+    form.addEventListener('submit', () => {
+        const button = form.querySelector('[data-ai-generation-button]');
+        const label = form.querySelector('[data-ai-generation-label]');
+
+        if (button) button.disabled = true;
+        if (label) label.textContent = 'Generating insights…';
+    });
+});
+
 const palette = {
     cyan: '#06b6d4',
     indigo: '#6366f1',
