@@ -10,10 +10,12 @@ use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\StudentInsightController;
 use App\Http\Controllers\StudentPerformanceController;
+use App\Http\Controllers\StudentQuizController;
 use App\Http\Controllers\StudentTutorController;
 use App\Http\Controllers\TeacherDashboardController;
 use App\Http\Controllers\TeacherGradebookController;
 use App\Http\Controllers\TeacherModuleController;
+use App\Http\Controllers\TeacherQuizController;
 use App\Http\Controllers\TeacherStudentController;
 use Illuminate\Support\Facades\Route;
 
@@ -37,6 +39,9 @@ Route::middleware('auth')->group(function () {
         ->name('teacher.dashboard');
 
     Route::middleware('role:teacher')->prefix('teacher')->name('teacher.')->group(function () {
+        Route::get('/quizzes', [TeacherQuizController::class, 'index'])->name('quizzes.index');
+        Route::post('/quizzes', [TeacherQuizController::class, 'store'])->middleware('throttle:5,1')->name('quizzes.store');
+        Route::patch('/quizzes/{quiz}/publish', [TeacherQuizController::class, 'togglePublish'])->name('quizzes.publish');
         Route::get('/modules', [TeacherModuleController::class, 'index'])->name('modules.index');
         Route::post('/modules', [TeacherModuleController::class, 'store'])
             ->middleware('throttle:10,1')
@@ -62,6 +67,10 @@ Route::middleware('auth')->group(function () {
         ->name('student.dashboard');
 
     Route::middleware('role:student')->prefix('student')->name('student.')->group(function () {
+        Route::get('/quizzes', [StudentQuizController::class, 'index'])->name('quizzes.index');
+        Route::get('/quizzes/{quiz}', [StudentQuizController::class, 'show'])->name('quizzes.show');
+        Route::post('/quizzes/{quiz}/attempts', [StudentQuizController::class, 'submit'])->name('quizzes.submit');
+        Route::get('/quiz-attempts/{attempt}', [StudentQuizController::class, 'results'])->name('quizzes.results');
         Route::get('/tutor', [StudentTutorController::class, 'index'])->name('tutor.index');
         Route::post('/tutor/questions', [StudentTutorController::class, 'store'])
             ->middleware('throttle:10,1')

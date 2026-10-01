@@ -48,4 +48,9 @@ class Student extends Model
     {
         return $this->hasMany(ChatConversation::class);
     }
+
+    public function quizAttempts(): HasMany
+    {
+        return $this->hasMany(QuizAttempt::class);
+    }
 }

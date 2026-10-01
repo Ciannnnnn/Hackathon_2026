@@ -17,13 +17,14 @@
                 ['label' => 'Gradebook', 'icon' => 'quiz', 'route' => 'teacher.grades.index', 'active' => 'teacher.grades.*'],
                 ['label' => 'Learning Analytics', 'icon' => 'chart'],
                 ['label' => 'Modules', 'icon' => 'book', 'route' => 'teacher.modules.index', 'active' => 'teacher.modules.*'],
+                ['label' => 'AI Quizzes', 'icon' => 'quiz', 'route' => 'teacher.quizzes.index', 'active' => 'teacher.quizzes.*'],
                 ['label' => 'AI Insights', 'icon' => 'sparkles'],
             ],
             'student' => [
                 ['label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'student.dashboard'],
                 ['label' => 'Study Plan', 'icon' => 'calendar'],
                 ['label' => 'AI Tutor', 'icon' => 'bot', 'route' => 'student.tutor.index', 'active' => 'student.tutor.*'],
-                ['label' => 'Practice Quiz', 'icon' => 'quiz'],
+                ['label' => 'Practice Quiz', 'icon' => 'quiz', 'route' => 'student.quizzes.index', 'active' => 'student.quizzes.*'],
                 ['label' => 'Progress', 'icon' => 'trend'],
             ],
             default => [

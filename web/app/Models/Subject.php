@@ -62,4 +62,9 @@ class Subject extends Model
     {
         return $this->hasMany(ChatConversation::class);
     }
+
+    public function quizzes(): HasMany
+    {
+        return $this->hasMany(GeneratedQuiz::class);
+    }
 }

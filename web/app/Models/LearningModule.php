@@ -52,4 +52,9 @@ class LearningModule extends Model
     {
         return $this->hasOne(ModuleChunk::class, 'module_id')->oldestOfMany('chunk_index');
     }
+
+    public function quizzes(): HasMany
+    {
+        return $this->hasMany(GeneratedQuiz::class, 'module_id');
+    }
 }

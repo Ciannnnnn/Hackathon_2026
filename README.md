@@ -166,6 +166,12 @@ Tutor answers are persisted with their conversation. Grounded answers display se
 
 Conversation access is student-scoped and subject-scoped. Students cannot open another learner's history, query an unenrolled subject, or retrieve passages across subject boundaries. The tutor can still use the configured demo fallback if Gemini is temporarily unavailable.
 
+## Grounded AI quizzes
+
+Phase 11 adds a teacher quiz workspace at `/teacher/quizzes` and a student practice area at `/student/quizzes`. A teacher chooses a ready PDF module, topic, difficulty, and question count. Gemini must return the exact requested number of questions and cite the numeric source chunk supporting each one. EduPulse rejects incomplete questions, invalid answer choices, and source IDs that were not included in the prompt. Unlike explanatory features, quiz generation never saves demo fallback questions because an assessment must remain grounded in teacher material.
+
+New quizzes can remain drafts while the teacher reviews the answer key, explanations, and source pages. Publishing makes the quiz available only to actively enrolled students in that subject. Student responses are graded immediately, saved as attempt history, and shown with correct answers, explanations, weak-topic guidance, and the module page to review. Drafts, other subjects, and another student's results are not accessible.
+
 ## Demo data
 
 The seed contains one admin, one teacher, ten students, two subjects, attendance, assignment submissions, quiz results, performance snapshots, support analyses, recommendations, study plans, module chunks, tutor history, and a generated quiz. It is sample content for demonstrating the application; administrators and teachers can replace it with managed subjects, enrollments, and grade entries from the interface.
@@ -192,5 +198,5 @@ EduPulse123!
 8. AI analysis and study plans - complete
 9. PDF upload and extraction - complete
 10. Retrieval-augmented AI tutor - complete
-11. AI-generated quizzes
+11. AI-generated quizzes - complete
 12. Analytics, polish, deployment, and demo hardening
