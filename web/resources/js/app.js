@@ -10,6 +10,11 @@ const setSidebarOpen = (open) => {
     sidebar.classList.toggle('-translate-x-full', !open);
     sidebarBackdrop.classList.toggle('hidden', !open);
     document.body.classList.toggle('overflow-hidden', open);
+    document.querySelector('[data-sidebar-open]')?.setAttribute('aria-expanded', String(open));
+
+    if (open) {
+        sidebar.querySelector('[data-sidebar-close]')?.focus();
+    }
 };
 
 document.querySelectorAll('[data-sidebar-open]').forEach((button) => {
@@ -52,12 +57,24 @@ document.querySelectorAll('[data-ai-generation-form]').forEach((form) => {
     });
 });
 
+document.querySelectorAll('[data-loading-form]').forEach((form) => {
+    form.addEventListener('submit', () => {
+        const button = form.querySelector('[data-loading-button]');
+        if (!button) return;
+
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+        button.textContent = form.dataset.loadingText || 'Working…';
+    });
+});
+
 const palette = {
     cyan: '#06b6d4',
     indigo: '#6366f1',
     emerald: '#10b981',
     amber: '#f59e0b',
     rose: '#f43f5e',
+    violet: '#8b5cf6',
     slate: '#94a3b8',
 };
 
@@ -85,19 +102,21 @@ document.querySelectorAll('[data-chart-config]').forEach((canvas) => {
         }
 
         const color = palette[dataset.color] || palette.cyan;
+        const isBar = config.type === 'bar';
 
         return {
             ...dataset,
             borderColor: color,
-            backgroundColor: `${color}18`,
+            backgroundColor: isBar ? `${color}cc` : `${color}18`,
             borderWidth: 2.5,
-            pointRadius: 3,
+            pointRadius: isBar ? 0 : 3,
             pointHoverRadius: 5,
             pointBackgroundColor: '#ffffff',
             pointBorderColor: color,
             pointBorderWidth: 2,
             tension: 0.38,
-            fill: index === 0,
+            fill: !isBar && index === 0,
+            borderRadius: isBar ? 8 : 0,
         };
     });
 

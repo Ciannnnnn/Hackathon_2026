@@ -1,17 +1,21 @@
 <?php
 
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AdminHealthController;
 use App\Http\Controllers\AdminSubjectController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AiIntegrationController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredStudentController;
 use App\Http\Controllers\DashboardRedirectController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\StudentInsightController;
 use App\Http\Controllers\StudentPerformanceController;
+use App\Http\Controllers\StudentProgressController;
 use App\Http\Controllers\StudentQuizController;
 use App\Http\Controllers\StudentTutorController;
+use App\Http\Controllers\TeacherAnalyticsController;
 use App\Http\Controllers\TeacherDashboardController;
 use App\Http\Controllers\TeacherGradebookController;
 use App\Http\Controllers\TeacherModuleController;
@@ -19,9 +23,7 @@ use App\Http\Controllers\TeacherQuizController;
 use App\Http\Controllers\TeacherStudentController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('landing');
-});
+Route::get('/', LandingController::class)->name('landing');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
@@ -39,6 +41,7 @@ Route::middleware('auth')->group(function () {
         ->name('teacher.dashboard');
 
     Route::middleware('role:teacher')->prefix('teacher')->name('teacher.')->group(function () {
+        Route::get('/analytics', TeacherAnalyticsController::class)->name('analytics');
         Route::get('/quizzes', [TeacherQuizController::class, 'index'])->name('quizzes.index');
         Route::post('/quizzes', [TeacherQuizController::class, 'store'])->middleware('throttle:5,1')->name('quizzes.store');
         Route::patch('/quizzes/{quiz}/publish', [TeacherQuizController::class, 'togglePublish'])->name('quizzes.publish');
@@ -67,6 +70,7 @@ Route::middleware('auth')->group(function () {
         ->name('student.dashboard');
 
     Route::middleware('role:student')->prefix('student')->name('student.')->group(function () {
+        Route::get('/progress', StudentProgressController::class)->name('progress');
         Route::get('/quizzes', [StudentQuizController::class, 'index'])->name('quizzes.index');
         Route::get('/quizzes/{quiz}', [StudentQuizController::class, 'show'])->name('quizzes.show');
         Route::post('/quizzes/{quiz}/attempts', [StudentQuizController::class, 'submit'])->name('quizzes.submit');
@@ -78,6 +82,7 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/health', AdminHealthController::class)->name('health');
         Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');

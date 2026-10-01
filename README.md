@@ -4,7 +4,7 @@ EduPulse AI is an AI-powered educational support platform for identifying studen
 
 ## Project status
 
-Phases 1 through 10 are complete. EduPulse now has a normalized demo database, secure role authentication, account provisioning, managed subjects and enrollments, a teacher gradebook, private PDF learning-material uploads and extraction, a source-grounded conversational AI tutor, responsive role-aware dashboards, a real Random Forest classifier, Gemini integration, and persisted AI-generated academic explanations, recommendations, and seven-day study plans.
+All 12 MVP phases are complete. EduPulse now has a normalized demo database, secure role authentication, account provisioning, managed subjects and enrollments, a teacher gradebook, private PDF learning-material uploads and extraction, a source-grounded conversational AI tutor and quiz generator, responsive role-aware analytics, a real Random Forest classifier, Gemini integration, and persisted AI-generated academic explanations, recommendations, and seven-day study plans.
 
 ## Architecture
 
@@ -74,6 +74,8 @@ Students can create their own account from `/register` or through the **Create a
 The teacher dashboard aggregates active enrollments and the latest performance snapshots into class metrics, support distribution, score trends, a prioritized student table, weak-topic frequency, and recent activity. The student dashboard presents current academic indicators, support context, weak topics, progress charts, recent quizzes, and the active seven-day study plan when those tables are available.
 
 Dashboard charts use Chart.js through the Vite bundle. Empty and partially configured accounts receive useful empty states instead of hard failures.
+
+Phase 12 adds dedicated analytics at `/teacher/analytics` and `/student/progress`. Teachers can filter analytics by their assigned subject and review performance, attendance, academic-support distribution, weak-topic frequency, and generated-quiz outcomes. Students receive a private subject-level view of their performance history, practice scores, and recurring focus topics. Administrators can inspect a secret-safe operational summary at `/admin/health`.
 
 ## Student performance and analysis
 
@@ -172,6 +174,23 @@ Phase 11 adds a teacher quiz workspace at `/teacher/quizzes` and a student pract
 
 New quizzes can remain drafts while the teacher reviews the answer key, explanations, and source pages. Publishing makes the quiz available only to actively enrolled students in that subject. Student responses are graded immediately, saved as attempt history, and shown with correct answers, explanations, weak-topic guidance, and the module page to review. Drafts, other subjects, and another student's results are not accessible.
 
+## Production deployment
+
+The Laravel application includes a production [Dockerfile](web/Dockerfile), Railway service configuration, optimized startup caching, `/up` liveness checks, `/api/health` dependency diagnostics, and baseline browser security headers. Deploy with the Railway service root set to `web/`; deploy `ml-service/` and `rag-service/` as separate services using their existing Procfiles.
+
+Import `database/schema.sql` once into the production MySQL database. Import `database/seed.sql` only for the hackathon demo environment. Because the complete SQL schema does not use Laravel's migration ledger, do not run `php artisan migrate` over that imported database.
+
+At minimum, configure production values for `APP_KEY`, `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL`, the `DB_*` connection, `SESSION_SECURE_COOKIE=true`, `GEMINI_API_KEY`, `ML_SERVICE_URL`, and `RAG_SERVICE_URL`. Attach persistent storage at `/var/www/html/storage/app/private` so uploaded teacher PDFs survive container redeployments. See [DEPLOYMENT.md](DEPLOYMENT.md) for the complete checklist and rollback notes.
+
+## Hackathon demo flow
+
+1. Sign in as `maria.reyes@edupulse.demo` and open **Learning Analytics** to show the mixed class outcomes and Alex Santos's high academic-support need.
+2. Open Alex from **Students**, record or review a performance snapshot, then generate AI insights and a seven-day plan.
+3. Open **Modules** to show the private teacher PDF and extracted preview, then use **AI Quizzes** to generate, review, and publish a grounded assessment.
+4. Sign in as `alex.santos@edupulse.demo`, open **AI Tutor**, ask about database normalization, and point out the cited module page.
+5. Complete the published quiz, review answer explanations, then open **Progress** to show the attempt and recurring focus topics.
+6. Sign in as the administrator and open **System Health** to show database and integration readiness without exposing credentials.
+
 ## Demo data
 
 The seed contains one admin, one teacher, ten students, two subjects, attendance, assignment submissions, quiz results, performance snapshots, support analyses, recommendations, study plans, module chunks, tutor history, and a generated quiz. It is sample content for demonstrating the application; administrators and teachers can replace it with managed subjects, enrollments, and grade entries from the interface.
@@ -199,4 +218,4 @@ EduPulse123!
 9. PDF upload and extraction - complete
 10. Retrieval-augmented AI tutor - complete
 11. AI-generated quizzes - complete
-12. Analytics, polish, deployment, and demo hardening
+12. Analytics, polish, deployment, and demo hardening - complete

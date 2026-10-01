@@ -6,7 +6,7 @@
 
     @if ($errors->any())<div class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">Please answer the quiz using valid responses.</div>@endif
 
-    <form method="POST" action="{{ route('student.quizzes.submit', $quiz) }}" class="mt-7 space-y-4">
+    <form method="POST" action="{{ route('student.quizzes.submit', $quiz) }}" data-loading-form data-loading-text="Grading quiz…" class="mt-7 space-y-4">
         @csrf
         @foreach ($quiz->questions as $question)
             <fieldset class="dashboard-panel p-5 sm:p-6">
@@ -19,6 +19,6 @@
                 @endif
             </fieldset>
         @endforeach
-        <div class="flex justify-end"><button type="submit" class="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700">Submit and grade</button></div>
+        <div class="flex justify-end"><button type="submit" data-loading-button class="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 disabled:cursor-wait disabled:opacity-70">Submit and grade</button></div>
     </form>
 @endsection

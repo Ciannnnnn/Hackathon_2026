@@ -12,7 +12,11 @@ class HealthEndpointTest extends TestCase
 
     public function test_liveness_endpoint_remains_available(): void
     {
-        $this->get('/up')->assertOk();
+        $this->get('/up')
+            ->assertOk()
+            ->assertHeader('X-Content-Type-Options', 'nosniff')
+            ->assertHeader('X-Frame-Options', 'SAMEORIGIN')
+            ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     }
 
     public function test_diagnostic_endpoint_reports_an_incomplete_schema_without_leaking_secrets(): void

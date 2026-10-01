@@ -33,7 +33,7 @@
                 <p class="mt-1 text-xs leading-5 text-slate-400">Only ready modules with extracted text are available. Generation can take a few seconds.</p>
             </div>
             @if ($modules->isNotEmpty())
-                <form method="POST" action="{{ route('teacher.quizzes.store') }}" class="grid gap-5 p-5 sm:grid-cols-2 sm:p-6 xl:grid-cols-6">
+                <form method="POST" action="{{ route('teacher.quizzes.store') }}" data-loading-form data-loading-text="Generating quiz…" class="grid gap-5 p-5 sm:grid-cols-2 sm:p-6 xl:grid-cols-6">
                     @csrf
                     <input type="hidden" name="subject_id" value="{{ $selectedSubject->id }}" />
                     <label class="block sm:col-span-2 xl:col-span-2"><span class="text-xs font-semibold text-slate-600">Source module</span><select name="module_id" required class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-cyan-400 focus:bg-white">@foreach ($modules as $module)<option value="{{ $module->id }}" @selected(old('module_id') == $module->id)>{{ $module->title }} ({{ $module->chunks_count }} chunks)</option>@endforeach</select></label>
@@ -42,7 +42,7 @@
                     <label class="block"><span class="text-xs font-semibold text-slate-600">Difficulty</span><select name="difficulty" class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm"><option value="easy">Easy</option><option value="medium" @selected(old('difficulty', 'medium') === 'medium')>Medium</option><option value="hard" @selected(old('difficulty') === 'hard')>Hard</option></select></label>
                     <label class="block"><span class="text-xs font-semibold text-slate-600">Questions</span><input type="number" name="question_count" value="{{ old('question_count', 5) }}" min="3" max="10" required class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm" /></label>
                     <label class="flex items-center gap-3 self-end rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600"><input type="hidden" name="is_published" value="0" /><input type="checkbox" name="is_published" value="1" @checked(old('is_published')) class="rounded border-slate-300 text-indigo-600" /> Publish immediately</label>
-                    <button type="submit" class="self-end rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700">Generate quiz</button>
+                    <button type="submit" data-loading-button class="self-end rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700 disabled:cursor-wait disabled:opacity-70">Generate quiz</button>
                 </form>
             @else
                 <div class="p-6"><x-empty-state title="No ready module" message="Upload and successfully extract a PDF learning module before generating a grounded quiz." /><div class="mt-4 text-center"><a href="{{ route('teacher.modules.index', ['subject' => $selectedSubject->id]) }}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">Go to Learning Modules</a></div></div>

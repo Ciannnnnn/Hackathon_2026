@@ -8,6 +8,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
+    <a href="#main-content" class="sr-only z-[100] rounded-lg bg-slate-950 px-4 py-2 text-white focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Skip to main content</a>
     @php
         $role = auth()->user()->role->value;
         $navigation = match ($role) {
@@ -15,23 +16,23 @@
                 ['label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'teacher.dashboard'],
                 ['label' => 'Students', 'icon' => 'users', 'route' => 'teacher.students.index', 'active' => 'teacher.students.*'],
                 ['label' => 'Gradebook', 'icon' => 'quiz', 'route' => 'teacher.grades.index', 'active' => 'teacher.grades.*'],
-                ['label' => 'Learning Analytics', 'icon' => 'chart'],
+                ['label' => 'Learning Analytics', 'icon' => 'chart', 'route' => 'teacher.analytics'],
                 ['label' => 'Modules', 'icon' => 'book', 'route' => 'teacher.modules.index', 'active' => 'teacher.modules.*'],
                 ['label' => 'AI Quizzes', 'icon' => 'quiz', 'route' => 'teacher.quizzes.index', 'active' => 'teacher.quizzes.*'],
-                ['label' => 'AI Insights', 'icon' => 'sparkles'],
+                ['label' => 'AI Insights', 'icon' => 'sparkles', 'route' => 'teacher.students.index', 'active' => '__never__'],
             ],
             'student' => [
                 ['label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'student.dashboard'],
-                ['label' => 'Study Plan', 'icon' => 'calendar'],
+                ['label' => 'Study Plan', 'icon' => 'calendar', 'route' => 'student.dashboard', 'fragment' => 'study-plan'],
                 ['label' => 'AI Tutor', 'icon' => 'bot', 'route' => 'student.tutor.index', 'active' => 'student.tutor.*'],
                 ['label' => 'Practice Quiz', 'icon' => 'quiz', 'route' => 'student.quizzes.index', 'active' => 'student.quizzes.*'],
-                ['label' => 'Progress', 'icon' => 'trend'],
+                ['label' => 'Progress', 'icon' => 'trend', 'route' => 'student.progress'],
             ],
             default => [
                 ['label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'admin.dashboard'],
                 ['label' => 'Users', 'icon' => 'users', 'route' => 'admin.users.index'],
                 ['label' => 'Subjects', 'icon' => 'book', 'route' => 'admin.subjects.index', 'active' => 'admin.subjects.*'],
-                ['label' => 'System Health', 'icon' => 'chart'],
+                ['label' => 'System Health', 'icon' => 'chart', 'route' => 'admin.health'],
             ],
         };
     @endphp
@@ -57,10 +58,10 @@
             @foreach ($navigation as $item)
                 @php
                     $available = isset($item['route']);
-                    $active = $available && request()->routeIs($item['active'] ?? $item['route']);
+                    $active = $available && ! isset($item['fragment']) && request()->routeIs($item['active'] ?? $item['route']);
                 @endphp
                 <a
-                    href="{{ $available ? route($item['route']) : '#' }}"
+                    href="{{ $available ? route($item['route']).(isset($item['fragment']) ? '#'.$item['fragment'] : '') : '#' }}"
                     @if (! $available) aria-disabled="true" onclick="return false" @endif
                     class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition {{ $active ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-950/30' : 'text-slate-400 hover:bg-white/[0.07] hover:text-white' }} {{ ! $available ? 'cursor-not-allowed opacity-60' : '' }}"
                 >
@@ -96,7 +97,7 @@
     <div class="min-h-screen lg:pl-72">
         <header class="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-slate-200/80 bg-white/90 px-5 backdrop-blur-xl sm:px-8">
             <div class="flex items-center gap-3">
-                <button data-sidebar-open type="button" class="rounded-xl border border-slate-200 p-2.5 text-slate-600 shadow-sm lg:hidden" aria-label="Open navigation">
+                <button data-sidebar-open type="button" class="rounded-xl border border-slate-200 p-2.5 text-slate-600 shadow-sm lg:hidden" aria-label="Open navigation" aria-expanded="false">
                     <x-icon name="menu" />
                 </button>
                 <div>
@@ -105,14 +106,11 @@
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <span class="hidden rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100 sm:inline-flex">System ready</span>
-                <button type="button" class="relative rounded-xl border border-slate-200 p-2.5 text-slate-500 shadow-sm transition hover:bg-slate-50" aria-label="Notifications">
-                    <x-icon name="bell" />
-                </button>
+                <span class="hidden rounded-full bg-cyan-50 px-3 py-1.5 text-xs font-semibold text-cyan-700 ring-1 ring-cyan-100 sm:inline-flex">{{ ucfirst($role) }} workspace</span>
             </div>
         </header>
 
-        <main class="px-5 py-7 sm:px-8 lg:px-10 lg:py-9">
+        <main id="main-content" class="px-5 py-7 sm:px-8 lg:px-10 lg:py-9" tabindex="-1">
             @if (session('status'))
                 <div class="mb-6 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm text-emerald-800 shadow-sm" role="status">
                     <span class="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-emerald-600 text-white"><x-icon name="check" class="h-3.5 w-3.5" /></span>

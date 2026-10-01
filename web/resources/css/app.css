@@ -19,8 +19,24 @@
         text-rendering: optimizeLegibility;
     }
 
+    :focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--color-cyan-400) 70%, white);
+        outline-offset: 3px;
+    }
+
     ::selection {
         background: color-mix(in srgb, var(--color-cyan-400) 35%, transparent);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
     }
 }
 

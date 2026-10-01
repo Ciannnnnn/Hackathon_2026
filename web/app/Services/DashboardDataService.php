@@ -242,22 +242,38 @@ class DashboardDataService
     /** @return Collection<int, object> */
     private function recentQuizzes(int $studentId): Collection
     {
-        if (! Schema::hasTable('quiz_results')) {
-            return collect();
-        }
+        $legacyResults = Schema::hasTable('quiz_results')
+            ? DB::table('quiz_results')
+                ->join('subjects', 'subjects.id', '=', 'quiz_results.subject_id')
+                ->where('quiz_results.student_id', $studentId)
+                ->get([
+                    'quiz_results.topic',
+                    'quiz_results.score',
+                    'quiz_results.max_score',
+                    'quiz_results.taken_at',
+                    'subjects.code as subject_code',
+                ])
+            : collect();
 
-        return DB::table('quiz_results')
-            ->join('subjects', 'subjects.id', '=', 'quiz_results.subject_id')
-            ->where('quiz_results.student_id', $studentId)
-            ->orderByDesc('quiz_results.taken_at')
-            ->limit(5)
-            ->get([
-                'quiz_results.topic',
-                'quiz_results.score',
-                'quiz_results.max_score',
-                'quiz_results.taken_at',
-                'subjects.code as subject_code',
-            ]);
+        $generatedResults = Schema::hasTable('quiz_attempts') && Schema::hasTable('generated_quizzes')
+            ? DB::table('quiz_attempts')
+                ->join('generated_quizzes', 'generated_quizzes.id', '=', 'quiz_attempts.quiz_id')
+                ->join('subjects', 'subjects.id', '=', 'generated_quizzes.subject_id')
+                ->where('quiz_attempts.student_id', $studentId)
+                ->whereNotNull('quiz_attempts.completed_at')
+                ->get([
+                    'generated_quizzes.title as topic',
+                    'quiz_attempts.score',
+                    'quiz_attempts.max_score',
+                    'quiz_attempts.completed_at as taken_at',
+                    'subjects.code as subject_code',
+                ])
+            : collect();
+
+        return $legacyResults->concat($generatedResults)
+            ->sortByDesc('taken_at')
+            ->take(5)
+            ->values();
     }
 
     /** @return array<string, mixed> */
