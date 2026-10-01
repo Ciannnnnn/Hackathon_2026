@@ -67,7 +67,7 @@ Open `http://localhost:8000/login` after importing the complete schema and seed 
 
 Authentication uses Laravel's server-side session guard with CSRF protection, regenerated sessions after login, invalidated sessions on logout, bcrypt-compatible password verification, and per-email/IP login throttling. On an HTTPS deployment, set `SESSION_SECURE_COOKIE=true`.
 
-Public registration is intentionally disabled. Administrators create student, teacher, or administrator accounts from `/admin/users`, including the role-specific student or teacher profile and a strong temporary password. Administrators can also activate or deactivate accounts, but cannot deactivate their own current account.
+Students can create their own account from `/register` or through the **Create an account** link on the sign-in page. Self-registration always creates a student role; submitted role values cannot elevate access. Teacher and administrator accounts remain restricted to the administrator-only `/admin/users` workspace, which also supports student provisioning and account activation controls.
 
 ## Dashboards
 

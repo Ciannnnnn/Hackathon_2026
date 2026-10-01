@@ -52,7 +52,7 @@ Teacher ownership is checked for both page access and writes; a teacher cannot i
 
 ## Account management
 
-Public registration is disabled. Administrators can use `/admin/users` to create student, teacher, and administrator accounts, create the matching role profile, search existing accounts, and activate or deactivate access. Passwords must contain at least 12 characters with mixed-case letters and numbers.
+Students can self-register securely at `/register`; the public form always creates a student account and profile. Administrators can use `/admin/users` to create student, teacher, and administrator accounts, create matching role profiles, search existing accounts, and activate or deactivate access. Passwords must contain at least 12 characters with mixed-case letters and numbers.
 
 ## Phase 6 machine learning integration
 

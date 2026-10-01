@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\RegisteredStudentController;
 use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\StudentPerformanceController;
@@ -17,6 +18,8 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+    Route::get('/register', [RegisteredStudentController::class, 'create'])->name('register');
+    Route::post('/register', [RegisteredStudentController::class, 'store'])->name('register.store');
 });
 
 Route::middleware('auth')->group(function () {

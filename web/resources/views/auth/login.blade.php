@@ -66,8 +66,9 @@
             </form>
 
             <p class="mt-6 text-center text-xs leading-5 text-slate-500">
-                Access is restricted to authorized students, teachers, and administrators.
+                New student? <a href="{{ route('register') }}" class="font-semibold text-cyan-300 transition hover:text-cyan-200">Create an account</a>
             </p>
+            <p class="mt-2 text-center text-[11px] leading-5 text-slate-600">Teacher and administrator accounts are created by an administrator.</p>
         </section>
     </div>
 @endsection
