@@ -9,3 +9,36 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        text-rendering: optimizeLegibility;
+    }
+
+    ::selection {
+        background: color-mix(in srgb, var(--color-cyan-400) 35%, transparent);
+    }
+}
+
+@layer components {
+    .dashboard-panel {
+        @apply rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-200/50;
+    }
+
+    .chart-empty {
+        @apply relative;
+    }
+
+    .chart-empty::after {
+        content: 'No performance data yet';
+        @apply absolute inset-0 grid place-items-center text-sm font-medium text-slate-400;
+    }
+
+    .chart-empty canvas {
+        @apply opacity-0;
+    }
+}

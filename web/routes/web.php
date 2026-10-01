@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardRedirectController;
+use App\Http\Controllers\StudentDashboardController;
+use App\Http\Controllers\TeacherDashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('landing');
 });
 
 Route::middleware('guest')->group(function () {
@@ -17,11 +19,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardRedirectController::class)->name('dashboard');
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-    Route::view('/teacher/dashboard', 'dashboards.teacher')
+    Route::get('/teacher/dashboard', TeacherDashboardController::class)
         ->middleware('role:teacher')
         ->name('teacher.dashboard');
 
-    Route::view('/student/dashboard', 'dashboards.student')
+    Route::get('/student/dashboard', StudentDashboardController::class)
         ->middleware('role:student')
         ->name('student.dashboard');
 

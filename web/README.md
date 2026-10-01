@@ -33,6 +33,17 @@ SESSION_HTTP_ONLY=true
 SESSION_SAME_SITE=lax
 ```
 
+## Phase 4 interface
+
+The Blade interface includes a responsive landing page, mobile sidebar navigation, role-aware workspaces, reusable metric and status components, and Chart.js analytics. Teacher metrics are aggregated from active enrollments and performance/support records. Student dashboards also read quiz results and active study plans when the complete Phase 1 schema is present.
+
+Primary routes:
+
+- `/` - public landing page
+- `/teacher/dashboard` - teacher analytics and student academic pulse
+- `/student/dashboard` - personal learning pulse and study plan
+- `/admin/dashboard` - lightweight system overview
+
 Run the test suite and code formatter with:
 
 ```powershell

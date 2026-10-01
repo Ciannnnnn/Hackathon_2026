@@ -1,13 +1,14 @@
-@extends('layouts.app', ['title' => 'Admin Dashboard | EduPulse AI'])
+@extends('layouts.dashboard', ['title' => 'Admin Dashboard | EduPulse AI'])
 
 @section('content')
-    <x-dashboard-shell
-        eyebrow="Administration"
-        title="Welcome, {{ auth()->user()->first_name }}"
-        description="Your account is authenticated and protected by the administrator role. User and system management tools can be added after the student and teacher MVP."
-    >
-        <x-dashboard-card label="Authentication" value="Secure" detail="Rate limiting helps prevent repeated login attempts." />
-        <x-dashboard-card label="Authorization" value="Admin" detail="This route is restricted to administrator accounts." />
-        <x-dashboard-card label="Priority" value="MVP first" detail="Student and teacher experiences remain the hackathon focus." />
-    </x-dashboard-shell>
+    <div>
+        <p class="text-sm font-semibold text-cyan-600">Administration</p>
+        <h1 class="mt-1 text-3xl font-semibold tracking-tight text-slate-950">System overview</h1>
+        <p class="mt-2 text-sm text-slate-500">Administrative tools remain intentionally lightweight while the student and teacher MVP is completed.</p>
+    </div>
+    <section class="mt-7 grid gap-4 md:grid-cols-3">
+        <x-metric-card label="Authentication" value="Active" detail="Role-secured session access is enabled" icon="check" tone="emerald" />
+        <x-metric-card label="User roles" value="3" detail="Student, teacher, and administrator" icon="users" tone="indigo" />
+        <x-metric-card label="System health" value="Ready" detail="Use /api/health for full diagnostics" icon="chart" tone="cyan" />
+    </section>
 @endsection

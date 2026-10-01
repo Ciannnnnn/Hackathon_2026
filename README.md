@@ -4,7 +4,7 @@ EduPulse AI is an AI-powered educational support platform for identifying studen
 
 ## Project status
 
-Phases 1 through 3 are complete. The normalized MySQL schema and deterministic demo data are ready; Laravel now has a schema-compatible data layer, resilient health diagnostics, secure session authentication, login throttling, and student/teacher/admin route authorization.
+Phases 1 through 4 are complete. EduPulse now has a normalized demo database, schema-compatible Laravel data layer, secure role authentication, a polished landing page, responsive role-aware navigation, and database-backed teacher and student dashboards with interactive analytics.
 
 ## Architecture
 
@@ -67,6 +67,12 @@ Open `http://localhost:8000/login` after importing the complete schema and seed 
 
 Authentication uses Laravel's server-side session guard with CSRF protection, regenerated sessions after login, invalidated sessions on logout, bcrypt-compatible password verification, and per-email/IP login throttling. On an HTTPS deployment, set `SESSION_SECURE_COOKIE=true`.
 
+## Dashboards
+
+The teacher dashboard aggregates active enrollments and the latest performance snapshots into class metrics, support distribution, score trends, a prioritized student table, weak-topic frequency, and recent activity. The student dashboard presents current academic indicators, support context, weak topics, progress charts, recent quizzes, and the active seven-day study plan when those tables are available.
+
+Dashboard charts use Chart.js through the Vite bundle. Empty and partially configured accounts receive useful empty states instead of hard failures.
+
 ## Demo data
 
 The seed contains one admin, one teacher, ten students, two subjects, attendance, assignment submissions, quiz results, performance snapshots, support analyses, recommendations, study plans, module chunks, tutor history, and a generated quiz.
@@ -86,7 +92,7 @@ EduPulse123!
 1. Project structure and database schema - complete
 2. Laravel foundation and MySQL integration - complete
 3. Authentication and role authorization - complete
-4. Blade layouts, landing page, and dashboards
+4. Blade layouts, landing page, and dashboards - complete
 5. Performance records and student analysis
 6. Python ML service and Laravel integration
 7. Gemini integration
