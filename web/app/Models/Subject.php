@@ -52,4 +52,9 @@ class Subject extends Model
     {
         return $this->hasMany(StudyPlan::class);
     }
+
+    public function modules(): HasMany
+    {
+        return $this->hasMany(LearningModule::class);
+    }
 }

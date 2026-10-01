@@ -51,4 +51,13 @@ class StudentPerformance extends Model
     {
         return $this->hasOne(StudentSupportAnalysis::class, 'performance_id');
     }
+
+    public function getOverallGradeAttribute(): float
+    {
+        return round((
+            (float) $this->quiz_average
+            + (float) $this->assignment_average
+            + (float) $this->activity_score
+        ) / 3, 2);
+    }
 }

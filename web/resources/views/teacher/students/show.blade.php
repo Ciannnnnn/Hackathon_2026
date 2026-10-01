@@ -51,7 +51,8 @@
         </div>
     @endif
 
-    <section class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Latest student performance">
+    <section class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5" aria-label="Latest student performance">
+        <x-metric-card label="Overall grade" :value="$latest ? number_format($latest->overall_grade, 1) : '—'" :suffix="$latest ? '%' : null" detail="Quiz, assignment, and activity average" icon="check" :tone="$latest && $latest->overall_grade < 75 ? 'rose' : 'emerald'" />
         <x-metric-card label="Attendance" :value="$latest ? number_format((float) $latest->attendance_rate, 0) : '—'" :suffix="$latest ? '%' : null" detail="Latest recorded attendance rate" icon="calendar" tone="emerald" />
         <x-metric-card label="Quiz average" :value="$latest ? number_format((float) $latest->quiz_average, 0) : '—'" :suffix="$latest ? '%' : null" detail="Average across recent quizzes" icon="quiz" tone="cyan" />
         <x-metric-card label="Assignment average" :value="$latest ? number_format((float) $latest->assignment_average, 0) : '—'" :suffix="$latest ? '%' : null" detail="Graded assignment performance" icon="book" tone="indigo" />
@@ -208,10 +209,10 @@
         @if ($records->isNotEmpty())
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[900px] text-left">
-                    <thead class="bg-slate-50/80 text-[10px] font-bold uppercase tracking-wider text-slate-400"><tr><th class="px-6 py-3.5">Date</th><th class="px-4 py-3.5">Attendance</th><th class="px-4 py-3.5">Quiz</th><th class="px-4 py-3.5">Assignment</th><th class="px-4 py-3.5">Late</th><th class="px-4 py-3.5">Missing</th><th class="px-4 py-3.5">Activity</th><th class="px-6 py-3.5">Support</th></tr></thead>
+                    <thead class="bg-slate-50/80 text-[10px] font-bold uppercase tracking-wider text-slate-400"><tr><th class="px-6 py-3.5">Date</th><th class="px-4 py-3.5">Overall grade</th><th class="px-4 py-3.5">Attendance</th><th class="px-4 py-3.5">Quiz</th><th class="px-4 py-3.5">Assignment</th><th class="px-4 py-3.5">Late</th><th class="px-4 py-3.5">Missing</th><th class="px-4 py-3.5">Activity</th><th class="px-6 py-3.5">Support</th></tr></thead>
                     <tbody class="divide-y divide-slate-100">
                         @foreach ($records as $record)
-                            <tr><td class="px-6 py-4 text-sm font-semibold text-slate-700">{{ $record->snapshot_date->format('M d, Y') }}</td><td class="px-4 py-4 text-sm text-slate-600">{{ number_format((float) $record->attendance_rate, 0) }}%</td><td class="px-4 py-4 text-sm text-slate-600">{{ number_format((float) $record->quiz_average, 0) }}%</td><td class="px-4 py-4 text-sm text-slate-600">{{ number_format((float) $record->assignment_average, 0) }}%</td><td class="px-4 py-4 text-sm text-slate-600">{{ $record->late_submissions }}</td><td class="px-4 py-4 text-sm {{ $record->missing_submissions ? 'font-semibold text-rose-600' : 'text-slate-600' }}">{{ $record->missing_submissions }}</td><td class="px-4 py-4 text-sm text-slate-600">{{ number_format((float) $record->activity_score, 0) }}%</td><td class="px-6 py-4"><x-support-badge :level="$record->supportAnalysis?->support_level?->value ?? 'UNASSESSED'" /></td></tr>
+                            <tr><td class="px-6 py-4 text-sm font-semibold text-slate-700">{{ $record->snapshot_date->format('M d, Y') }}</td><td class="px-4 py-4 text-sm font-semibold {{ $record->overall_grade < 75 ? 'text-rose-600' : 'text-emerald-600' }}">{{ number_format($record->overall_grade, 1) }}%</td><td class="px-4 py-4 text-sm text-slate-600">{{ number_format((float) $record->attendance_rate, 0) }}%</td><td class="px-4 py-4 text-sm text-slate-600">{{ number_format((float) $record->quiz_average, 0) }}%</td><td class="px-4 py-4 text-sm text-slate-600">{{ number_format((float) $record->assignment_average, 0) }}%</td><td class="px-4 py-4 text-sm text-slate-600">{{ $record->late_submissions }}</td><td class="px-4 py-4 text-sm {{ $record->missing_submissions ? 'font-semibold text-rose-600' : 'text-slate-600' }}">{{ $record->missing_submissions }}</td><td class="px-4 py-4 text-sm text-slate-600">{{ number_format((float) $record->activity_score, 0) }}%</td><td class="px-6 py-4"><x-support-badge :level="$record->supportAnalysis?->support_level?->value ?? 'UNASSESSED'" /></td></tr>
                         @endforeach
                     </tbody>
                 </table>

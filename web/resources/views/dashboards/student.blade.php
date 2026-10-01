@@ -29,7 +29,7 @@
                 </div>
                 <div class="relative grid h-32 w-32 shrink-0 place-items-center rounded-full" style="background: conic-gradient(#22d3ee {{ min(100, $status['overall_score']) }}%, rgba(255,255,255,.08) 0)">
                     <div class="grid h-24 w-24 place-items-center rounded-full bg-slate-950 text-center">
-                        <div><p class="text-3xl font-semibold">{{ number_format($status['overall_score'], 0) }}</p><p class="text-[10px] uppercase tracking-wider text-slate-500">Overall</p></div>
+                        <div><p class="text-3xl font-semibold">{{ number_format($status['overall_score'], 0) }}</p><p class="text-[10px] uppercase tracking-wider text-slate-500">Grade</p></div>
                     </div>
                 </div>
             </div>

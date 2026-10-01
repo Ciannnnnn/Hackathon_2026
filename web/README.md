@@ -54,6 +54,12 @@ Teacher ownership is checked for both page access and writes; a teacher cannot i
 
 Students can self-register securely at `/register`; the public form always creates a student account and profile. Administrators can use `/admin/users` to create student, teacher, and administrator accounts, create matching role profiles, search existing accounts, and activate or deactivate access. Passwords must contain at least 12 characters with mixed-case letters and numbers.
 
+## Subject and grade management
+
+Administrators use `/admin/subjects` to create subject offerings, assign an active teacher, enroll students, update class membership, and activate or deactivate offerings. Existing enrollments are marked dropped when removed rather than deleted, preserving the origin of historical academic records.
+
+Teachers use `/teacher/grades` to select one of their active subjects and record grades only for actively enrolled students. A grade entry stores the quiz, assignment, and activity components, attendance, late and missing submission counts, and optional weak topics as a dated performance snapshot. Overall grade and performance trend are calculated consistently, and every save refreshes the academic support assessment.
+
 ## Phase 6 machine learning integration
 
 When a teacher saves a performance snapshot, Laravel sends the seven validated indicators to `POST {ML_SERVICE_URL}/predict`. Valid predictions are stored with the `ml_only` source, confidence, and model version. Connection failures, non-success responses, and invalid payloads safely use the local `rules_fallback` assessment.
@@ -87,6 +93,21 @@ Run `php artisan config:clear` after updating `.env`. Administrators can check r
 From `/teacher/students/{student}`, an authorized teacher can generate or refresh AI support insights for a selected subject. The workflow requires a performance snapshot, sends only academic indicators to the configured AI provider, validates every returned field, and persists the explanation, weak topics, recommendations, active study plan, and seven dated plan items in one database transaction.
 
 The generation route is teacher-only, verifies active class ownership, and is rate-limited. Refreshing archives prior AI plans and replaces only pending AI recommendations; teacher-authored and in-progress guidance is preserved. The active result is visible from both the teacher analysis page and student dashboard.
+
+## Phase 9 PDF modules and extraction
+
+Teachers manage subject learning materials at `/teacher/modules`. Uploads accept validated PDFs up to `MAX_PDF_SIZE_MB`, store them on Laravel's private local disk using generated names, and send them server-to-server to `POST {RAG_SERVICE_URL}/extract`. The original PDF is available only through the ownership-protected teacher download route.
+
+The RAG service uses `pypdf` to extract selectable text and returns ordered chunks with source page numbers. Laravel validates and persists those chunks in `module_chunks`. Processing failures are recorded without leaking internals and can be retried from the module library. Encrypted and scanned image-only PDFs are rejected; OCR is not included in Phase 9.
+
+Configure the integration in `.env`:
+
+```env
+RAG_SERVICE_ENABLED=true
+RAG_SERVICE_URL=http://localhost:5002
+RAG_SERVICE_TIMEOUT=20
+MAX_PDF_SIZE_MB=10
+```
 
 Run the test suite and code formatter with:
 

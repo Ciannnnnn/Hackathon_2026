@@ -23,4 +23,9 @@ class Teacher extends Model
     {
         return $this->hasMany(Subject::class);
     }
+
+    public function modules(): HasMany
+    {
+        return $this->hasMany(LearningModule::class);
+    }
 }

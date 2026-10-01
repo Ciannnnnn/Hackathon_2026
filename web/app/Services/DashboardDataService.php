@@ -165,11 +165,7 @@ class DashboardDataService
 
         $latestPerformance = $performances->sortByDesc('snapshot_date')->first();
         $overallScore = $latestBySubject->isEmpty() ? 0 : round((float) $latestBySubject->avg(
-            fn (StudentPerformance $performance) => (
-                (float) $performance->quiz_average +
-                (float) $performance->assignment_average +
-                (float) $performance->attendance_rate
-            ) / 3,
+            fn (StudentPerformance $performance) => $performance->overall_grade,
         ), 1);
 
         $studyPlan = $this->studyPlan($student->id);
@@ -197,6 +193,7 @@ class DashboardDataService
                 'attendance' => $latestPerformance ? (float) $latestPerformance->attendance_rate : 0,
                 'quiz_average' => $latestPerformance ? (float) $latestPerformance->quiz_average : 0,
                 'assignment_average' => $latestPerformance ? (float) $latestPerformance->assignment_average : 0,
+                'overall_grade' => $latestPerformance?->overall_grade ?? 0,
                 'trend' => $latestPerformance ? (float) $latestPerformance->performance_trend : 0,
             ],
             'subjects' => $student->subjects->map(fn ($subject): array => [
@@ -294,7 +291,7 @@ class DashboardDataService
                 'summary' => 'Your student profile has not been linked yet.',
                 'weak_topics' => collect(),
             ],
-            'current' => ['attendance' => 0, 'quiz_average' => 0, 'assignment_average' => 0, 'trend' => 0],
+            'current' => ['attendance' => 0, 'quiz_average' => 0, 'assignment_average' => 0, 'overall_grade' => 0, 'trend' => 0],
             'subjects' => collect(),
             'progress_chart' => ['labels' => [], 'quiz' => [], 'assignment' => []],
             'study_plan' => ['title' => null, 'items' => collect()],

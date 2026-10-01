@@ -4,7 +4,7 @@ EduPulse AI is an AI-powered educational support platform for identifying studen
 
 ## Project status
 
-Phases 1 through 8 are complete. EduPulse now has a normalized demo database, secure role authentication, account provisioning, responsive role-aware dashboards, a real Random Forest classifier, Gemini integration, and persisted AI-generated academic explanations, recommendations, and seven-day study plans.
+Phases 1 through 9 are complete. EduPulse now has a normalized demo database, secure role authentication, account provisioning, managed subjects and enrollments, a teacher gradebook, private PDF learning-material uploads and extraction, responsive role-aware dashboards, a real Random Forest classifier, Gemini integration, and persisted AI-generated academic explanations, recommendations, and seven-day study plans.
 
 ## Architecture
 
@@ -81,6 +81,12 @@ Teachers can open `GET /teacher/students` to search and filter learners by subje
 
 Teachers can record or update a dated performance snapshot from the analysis page. Inputs are validated and restricted to students actively enrolled in one of the signed-in teacher's subjects. Laravel sends the seven academic indicators to the private ML service and stores the predicted support level, confidence, and model version. If the service is unavailable or returns invalid data, a transparent `rules_fallback` assessment keeps the workflow operational. Results describe educational support needs only and are never presented as medical, psychological, or behavioral diagnoses.
 
+## Subjects, enrollments, and grades
+
+Administrators manage the source of academic data from `/admin/subjects`. Each subject offering has a code, title, school year, term, assigned teacher, active status, and an explicit list of enrolled students. Administrators can change enrollment later; removed students are retained as dropped enrollments so historical records remain traceable.
+
+Teachers use `/teacher/grades` to record dated quiz, assignment, activity, attendance, and submission indicators only for students actively enrolled in their own subjects. The displayed overall grade is the equal average of quiz, assignment, and activity scores. Saving grades calculates the trend from the preceding dated record and immediately refreshes the ML or rules-based support assessment. The student dashboard then shows the latest teacher-recorded grade rather than relying only on seed data.
+
 ## Machine learning service
 
 The Flask service in `ml-service/` trains a deterministic `RandomForestClassifier` on 4,000 synthetic but correlated academic records. It exposes `GET /health` and validated `POST /predict` endpoints. The current trained model achieved 94.25% accuracy on its held-out synthetic test set; this metric demonstrates implementation quality and is not a claim of real-world educational validity.
@@ -134,9 +140,27 @@ Teachers can open a learner from `/teacher/students` and select **Generate AI in
 
 Refreshing insights archives the previous AI plan, replaces pending AI recommendations, and preserves teacher-created or already-in-progress guidance. Students immediately see the active plan and updated explanation on their dashboard. If Gemini is unavailable, the same workflow saves clearly reported demo fallback guidance so the hackathon flow remains usable.
 
+## PDF learning modules and extraction
+
+Phase 9 adds a teacher-only module library at `/teacher/modules`. Teachers select one of their assigned active subjects, upload a text-based PDF of up to `MAX_PDF_SIZE_MB`, and Laravel stores it outside the public web directory with a generated filename. The original filename is retained only for the authorized download response.
+
+Laravel sends the private file to the RAG service at `POST /extract`. The service validates the PDF signature and MIME type, rejects encrypted or image-only documents, extracts selectable text with `pypdf`, and returns overlapping page-aware chunks. Laravel validates the complete response before replacing stored chunks and marking the module ready. Failed files remain visible with a safe error and a retry action. Teachers cannot list, retry, download, or delete another teacher's modules.
+
+Start the RAG service in a separate terminal before uploading:
+
+```powershell
+cd rag-service
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python app.py
+```
+
+The default service URL is `http://localhost:5002`. Phase 9 supports text-based PDFs; OCR for scanned image documents is intentionally outside the current scope.
+
 ## Demo data
 
-The seed contains one admin, one teacher, ten students, two subjects, attendance, assignment submissions, quiz results, performance snapshots, support analyses, recommendations, study plans, module chunks, tutor history, and a generated quiz.
+The seed contains one admin, one teacher, ten students, two subjects, attendance, assignment submissions, quiz results, performance snapshots, support analyses, recommendations, study plans, module chunks, tutor history, and a generated quiz. It is sample content for demonstrating the application; administrators and teachers can replace it with managed subjects, enrollments, and grade entries from the interface.
 
 All seeded demo users use this password:
 
@@ -158,7 +182,7 @@ EduPulse123!
 6. Python ML service and Laravel integration - complete
 7. Gemini integration - complete
 8. AI analysis and study plans - complete
-9. PDF upload and extraction
+9. PDF upload and extraction - complete
 10. Retrieval-augmented AI tutor
 11. AI-generated quizzes
 12. Analytics, polish, deployment, and demo hardening

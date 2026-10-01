@@ -14,8 +14,9 @@
             'teacher' => [
                 ['label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'teacher.dashboard'],
                 ['label' => 'Students', 'icon' => 'users', 'route' => 'teacher.students.index', 'active' => 'teacher.students.*'],
+                ['label' => 'Gradebook', 'icon' => 'quiz', 'route' => 'teacher.grades.index', 'active' => 'teacher.grades.*'],
                 ['label' => 'Learning Analytics', 'icon' => 'chart'],
-                ['label' => 'Modules', 'icon' => 'book'],
+                ['label' => 'Modules', 'icon' => 'book', 'route' => 'teacher.modules.index', 'active' => 'teacher.modules.*'],
                 ['label' => 'AI Insights', 'icon' => 'sparkles'],
             ],
             'student' => [
@@ -28,6 +29,7 @@
             default => [
                 ['label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'admin.dashboard'],
                 ['label' => 'Users', 'icon' => 'users', 'route' => 'admin.users.index'],
+                ['label' => 'Subjects', 'icon' => 'book', 'route' => 'admin.subjects.index', 'active' => 'admin.subjects.*'],
                 ['label' => 'System Health', 'icon' => 'chart'],
             ],
         };

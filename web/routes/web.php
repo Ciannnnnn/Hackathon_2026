@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AdminSubjectController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AiIntegrationController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -10,6 +11,8 @@ use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\StudentInsightController;
 use App\Http\Controllers\StudentPerformanceController;
 use App\Http\Controllers\TeacherDashboardController;
+use App\Http\Controllers\TeacherGradebookController;
+use App\Http\Controllers\TeacherModuleController;
 use App\Http\Controllers\TeacherStudentController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +36,17 @@ Route::middleware('auth')->group(function () {
         ->name('teacher.dashboard');
 
     Route::middleware('role:teacher')->prefix('teacher')->name('teacher.')->group(function () {
+        Route::get('/modules', [TeacherModuleController::class, 'index'])->name('modules.index');
+        Route::post('/modules', [TeacherModuleController::class, 'store'])
+            ->middleware('throttle:10,1')
+            ->name('modules.store');
+        Route::post('/modules/{module}/retry', [TeacherModuleController::class, 'retry'])
+            ->middleware('throttle:10,1')
+            ->name('modules.retry');
+        Route::get('/modules/{module}/download', [TeacherModuleController::class, 'download'])->name('modules.download');
+        Route::delete('/modules/{module}', [TeacherModuleController::class, 'destroy'])->name('modules.destroy');
+        Route::get('/grades', [TeacherGradebookController::class, 'index'])->name('grades.index');
+        Route::post('/grades/{student}', [TeacherGradebookController::class, 'store'])->name('grades.store');
         Route::get('/students', [TeacherStudentController::class, 'index'])->name('students.index');
         Route::get('/students/{student}', [TeacherStudentController::class, 'show'])->name('students.show');
         Route::post('/students/{student}/performance', [StudentPerformanceController::class, 'store'])
@@ -51,6 +65,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
         Route::patch('/users/{user}/status', [AdminUserController::class, 'toggleStatus'])->name('users.status');
+        Route::get('/subjects', [AdminSubjectController::class, 'index'])->name('subjects.index');
+        Route::post('/subjects', [AdminSubjectController::class, 'store'])->name('subjects.store');
+        Route::put('/subjects/{subject}/enrollments', [AdminSubjectController::class, 'updateEnrollments'])
+            ->name('subjects.enrollments.update');
+        Route::patch('/subjects/{subject}/status', [AdminSubjectController::class, 'toggleStatus'])
+            ->name('subjects.status');
         Route::post('/integrations/gemini/test', AiIntegrationController::class)->name('integrations.gemini.test');
     });
 });
