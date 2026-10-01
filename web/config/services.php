@@ -35,4 +35,20 @@ return [
         ],
     ],
 
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
+        'demo_fallback' => env('AI_DEMO_FALLBACK', true),
+    ],
+
+    'ml' => [
+        'url' => env('ML_SERVICE_URL', 'http://localhost:5001'),
+        'timeout' => (int) env('ML_SERVICE_TIMEOUT', 10),
+    ],
+
+    'rag' => [
+        'url' => env('RAG_SERVICE_URL', 'http://localhost:5002'),
+        'timeout' => (int) env('RAG_SERVICE_TIMEOUT', 20),
+    ],
+
 ];

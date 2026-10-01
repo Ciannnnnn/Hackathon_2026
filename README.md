@@ -4,7 +4,7 @@ EduPulse AI is an AI-powered educational support platform for identifying studen
 
 ## Project status
 
-Phase 1 is complete: the normalized MySQL schema and deterministic demo data are ready. The application architecture has been updated from React/Express to Laravel with Blade after the PHP stack decision. Laravel 12 is installed and boots on the available PHP 8.2 runtime.
+Phases 1 and 2 are complete. The normalized MySQL schema and deterministic demo data are ready, and Laravel now has a schema-compatible authentication model, academic core models, Eloquent relationships, migrations, service configuration, and resilient health diagnostics.
 
 ## Architecture
 
@@ -36,6 +36,8 @@ cmd /c "mysql -u root -p edupulse_ai < database\seed.sql"
 
 The schema script recreates the `edupulse_ai` database. Do not run it over data that must be preserved.
 
+For the complete hackathon demo, import `database/schema.sql` and then `database/seed.sql`. The Laravel migrations currently cover the authentication and academic core tables used by automated tests; feature-specific migrations will be added with their phases. Do not run the current migrations over a database already created from `schema.sql`.
+
 Configure Laravel in `web/.env`. The committed template is `web/.env.example`; keep passwords and API keys only in the ignored `.env` file or the hosting provider's environment settings.
 
 Run the application:
@@ -51,6 +53,13 @@ php artisan serve
 Then open `http://localhost:8000`. The framework health endpoint is available at `http://localhost:8000/up`.
 
 Database-backed pages require valid `DB_*` credentials. The landing page and file-based sessions can run before a database connection is configured.
+
+Health endpoints:
+
+- `GET /up` checks that Laravel is running and is suitable for a deployment liveness probe.
+- `GET /api/health` checks the database connection, verifies the complete EduPulse schema, and reports integration configuration without exposing secrets. It returns HTTP 503 while the database is unavailable or incomplete.
+
+On Railway, either configure `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD`, or map Railway's MySQL connection URL to Laravel's `DB_URL` variable.
 
 ## Demo data
 
@@ -69,7 +78,7 @@ EduPulse123!
 ## Development phases
 
 1. Project structure and database schema - complete
-2. Laravel foundation and MySQL integration - in progress
+2. Laravel foundation and MySQL integration - complete
 3. Authentication and role authorization
 4. Blade layouts, landing page, and dashboards
 5. Performance records and student analysis
