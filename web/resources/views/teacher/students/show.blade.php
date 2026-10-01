@@ -146,7 +146,7 @@
     <section class="dashboard-panel mt-6 overflow-hidden">
         <div class="border-b border-slate-100 px-5 py-5 sm:px-6">
             <h2 class="font-semibold text-slate-900">Record performance snapshot</h2>
-            <p class="mt-1 text-xs text-slate-400">Saving the same subject and date updates that snapshot. A provisional rules-based support level is calculated until Phase 6 ML integration.</p>
+            <p class="mt-1 text-xs text-slate-400">Saving the same subject and date updates that snapshot. The ML classifier calculates support level, with an automatic rules fallback if the service is unavailable.</p>
         </div>
         <form method="POST" action="{{ route('teacher.students.performance.store', $student) }}" class="p-5 sm:p-6">
             @csrf

@@ -53,7 +53,7 @@ class SystemHealthService
                     'model' => config('services.gemini.model'),
                 ],
                 'ml_service' => [
-                    'configured' => filled(config('services.ml.url')),
+                    'configured' => (bool) config('services.ml.enabled') && filled(config('services.ml.url')),
                 ],
                 'rag_service' => [
                     'configured' => filled(config('services.rag.url')),

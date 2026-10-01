@@ -32,6 +32,7 @@ __pycache__/
 .mypy_cache/
 .venv/
 venv/
+.tmp/
 
 # Runtime data and generated models
 ml-service/model/*.pkl

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\StudentDashboardController;
@@ -36,7 +38,10 @@ Route::middleware('auth')->group(function () {
         ->middleware('role:student')
         ->name('student.dashboard');
 
-    Route::view('/admin/dashboard', 'dashboards.admin')
-        ->middleware('role:admin')
-        ->name('admin.dashboard');
+    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
+        Route::patch('/users/{user}/status', [AdminUserController::class, 'toggleStatus'])->name('users.status');
+    });
 });

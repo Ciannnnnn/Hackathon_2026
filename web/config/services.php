@@ -42,8 +42,9 @@ return [
     ],
 
     'ml' => [
+        'enabled' => env('ML_SERVICE_ENABLED', true),
         'url' => env('ML_SERVICE_URL', 'http://localhost:5001'),
-        'timeout' => (int) env('ML_SERVICE_TIMEOUT', 10),
+        'timeout' => (int) env('ML_SERVICE_TIMEOUT', 5),
     ],
 
     'rag' => [

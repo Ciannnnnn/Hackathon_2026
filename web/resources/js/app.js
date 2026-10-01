@@ -24,6 +24,24 @@ document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') setSidebarOpen(false);
 });
 
+const accountRole = document.querySelector('[data-account-role]');
+const roleFieldGroups = document.querySelectorAll('[data-role-fields]');
+
+const showRoleFields = () => {
+    if (!accountRole) return;
+
+    roleFieldGroups.forEach((group) => {
+        const visible = group.dataset.roleFields === accountRole.value;
+        group.classList.toggle('hidden', !visible);
+        group.querySelectorAll('input, select').forEach((input) => {
+            input.disabled = !visible;
+        });
+    });
+};
+
+accountRole?.addEventListener('change', showRoleFields);
+showRoleFields();
+
 const palette = {
     cyan: '#06b6d4',
     indigo: '#6366f1',

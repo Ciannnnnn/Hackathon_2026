@@ -48,7 +48,23 @@ Primary routes:
 
 Teachers have a searchable and filterable student roster at `/teacher/students`. The protected student detail route `/teacher/students/{student}` includes performance metrics, history charts, weak topics, recommendations, active study-plan context, and a validated form for recording dated snapshots.
 
-Every new snapshot receives a provisional rules-based academic support level so the workflow remains demonstrable before the Phase 6 machine-learning service is connected. Teacher ownership is checked for both page access and writes; a teacher cannot inspect or update a learner outside their active classes.
+Teacher ownership is checked for both page access and writes; a teacher cannot inspect or update a learner outside their active classes.
+
+## Account management
+
+Public registration is disabled. Administrators can use `/admin/users` to create student, teacher, and administrator accounts, create the matching role profile, search existing accounts, and activate or deactivate access. Passwords must contain at least 12 characters with mixed-case letters and numbers.
+
+## Phase 6 machine learning integration
+
+When a teacher saves a performance snapshot, Laravel sends the seven validated indicators to `POST {ML_SERVICE_URL}/predict`. Valid predictions are stored with the `ml_only` source, confidence, and model version. Connection failures, non-success responses, and invalid payloads safely use the local `rules_fallback` assessment.
+
+Configure the integration in `.env`:
+
+```env
+ML_SERVICE_ENABLED=true
+ML_SERVICE_URL=http://localhost:5001
+ML_SERVICE_TIMEOUT=5
+```
 
 Run the test suite and code formatter with:
 

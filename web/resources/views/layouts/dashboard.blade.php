@@ -27,7 +27,7 @@
             ],
             default => [
                 ['label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'admin.dashboard'],
-                ['label' => 'Users', 'icon' => 'users'],
+                ['label' => 'Users', 'icon' => 'users', 'route' => 'admin.users.index'],
                 ['label' => 'System Health', 'icon' => 'chart'],
             ],
         };

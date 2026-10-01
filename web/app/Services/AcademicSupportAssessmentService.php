@@ -7,6 +7,8 @@ use App\Models\StudentSupportAnalysis;
 
 class AcademicSupportAssessmentService
 {
+    public function __construct(private readonly MachineLearningService $machineLearning) {}
+
     /**
      * Create a provisional, explainable assessment until the ML service is introduced in Phase 6.
      *
@@ -47,21 +49,23 @@ class AcademicSupportAssessmentService
             $focusAreas[] = 'recent performance trend';
         }
 
-        $level = match (true) {
+        $fallbackLevel = match (true) {
             $riskPoints >= 7 => 'HIGH',
             $riskPoints >= 3 => 'MODERATE',
             default => 'LOW',
         };
+        $prediction = $this->machineLearning->predict($performance);
+        $level = $prediction['support_level'] ?? $fallbackLevel;
 
         return StudentSupportAnalysis::updateOrCreate(
             ['performance_id' => $performance->id],
             [
                 'support_level' => $level,
-                'confidence' => null,
+                'confidence' => $prediction['confidence'] ?? null,
                 'weak_topics' => array_values(array_unique($weakTopics)),
                 'ai_summary' => $this->summary($level, $focusAreas),
-                'model_version' => 'phase5-rules-v1',
-                'analysis_source' => 'rules_fallback',
+                'model_version' => $prediction['model_version'] ?? 'phase5-rules-v1',
+                'analysis_source' => $prediction ? 'ml_only' : 'rules_fallback',
                 'analyzed_at' => now(),
             ],
         );

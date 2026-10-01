@@ -4,7 +4,7 @@ EduPulse AI is an AI-powered educational support platform for identifying studen
 
 ## Project status
 
-Phases 1 through 5 are complete. EduPulse now has a normalized demo database, schema-compatible Laravel data layer, secure role authentication, a polished landing page, responsive role-aware navigation, database-backed dashboards, and a complete teacher workflow for reviewing students and recording academic performance snapshots.
+Phases 1 through 6 are complete. EduPulse now has a normalized demo database, secure role authentication, administrator account provisioning, responsive role-aware dashboards, teacher performance-analysis workflows, and a real Random Forest service for predicting academic support levels.
 
 ## Architecture
 
@@ -23,7 +23,7 @@ Laravel is the public application. It owns authentication, role authorization, M
 - Composer 2
 - Node.js 20+ and npm for Tailwind/Vite assets
 - MySQL 8.0+ or a compatible MariaDB version
-- Python 3.11+ for the later ML and RAG services
+- Python 3.11+ for the ML and RAG services
 
 ## Local setup
 
@@ -67,6 +67,8 @@ Open `http://localhost:8000/login` after importing the complete schema and seed 
 
 Authentication uses Laravel's server-side session guard with CSRF protection, regenerated sessions after login, invalidated sessions on logout, bcrypt-compatible password verification, and per-email/IP login throttling. On an HTTPS deployment, set `SESSION_SECURE_COOKIE=true`.
 
+Public registration is intentionally disabled. Administrators create student, teacher, or administrator accounts from `/admin/users`, including the role-specific student or teacher profile and a strong temporary password. Administrators can also activate or deactivate accounts, but cannot deactivate their own current account.
+
 ## Dashboards
 
 The teacher dashboard aggregates active enrollments and the latest performance snapshots into class metrics, support distribution, score trends, a prioritized student table, weak-topic frequency, and recent activity. The student dashboard presents current academic indicators, support context, weak topics, progress charts, recent quizzes, and the active seven-day study plan when those tables are available.
@@ -77,7 +79,24 @@ Dashboard charts use Chart.js through the Vite bundle. Empty and partially confi
 
 Teachers can open `GET /teacher/students` to search and filter learners by subject or academic support level. Each student analysis page shows the latest attendance, quiz, assignment, activity, submissions, trend, weak topics, recommendations, study plan, and historical performance chart.
 
-Teachers can record or update a dated performance snapshot from the analysis page. Inputs are validated and restricted to students actively enrolled in one of the signed-in teacher's subjects. Until the trained classifier is connected in Phase 6, new snapshots receive a transparent `rules_fallback` academic support level. This provisional result is educational only and is never described as a medical, psychological, or behavioral diagnosis.
+Teachers can record or update a dated performance snapshot from the analysis page. Inputs are validated and restricted to students actively enrolled in one of the signed-in teacher's subjects. Laravel sends the seven academic indicators to the private ML service and stores the predicted support level, confidence, and model version. If the service is unavailable or returns invalid data, a transparent `rules_fallback` assessment keeps the workflow operational. Results describe educational support needs only and are never presented as medical, psychological, or behavioral diagnoses.
+
+## Machine learning service
+
+The Flask service in `ml-service/` trains a deterministic `RandomForestClassifier` on 4,000 synthetic but correlated academic records. It exposes `GET /health` and validated `POST /predict` endpoints. The current trained model achieved 94.25% accuracy on its held-out synthetic test set; this metric demonstrates implementation quality and is not a claim of real-world educational validity.
+
+Set up and start the service in a separate terminal:
+
+```powershell
+cd ml-service
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python train_model.py
+python app.py
+```
+
+Laravel uses `ML_SERVICE_ENABLED`, `ML_SERVICE_URL`, and `ML_SERVICE_TIMEOUT` from `web/.env`. Keep the default URL `http://localhost:5001` for local development.
 
 ## Demo data
 
@@ -100,7 +119,7 @@ EduPulse123!
 3. Authentication and role authorization - complete
 4. Blade layouts, landing page, and dashboards - complete
 5. Performance records and student analysis - complete
-6. Python ML service and Laravel integration
+6. Python ML service and Laravel integration - complete
 7. Gemini integration
 8. AI analysis and study plans
 9. PDF upload and extraction
