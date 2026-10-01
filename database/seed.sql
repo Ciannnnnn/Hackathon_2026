@@ -4,7 +4,7 @@
 USE edupulse_ai;
 START TRANSACTION;
 
-SET @demo_password_hash = '$2b$10$RYTKd64X.mfLQA3wkvkw4eft0DEgfO4vga2V7dJEHhMxtMmzBwfPu';
+SET @demo_password_hash = '$2y$10$RYTKd64X.mfLQA3wkvkw4eft0DEgfO4vga2V7dJEHhMxtMmzBwfPu';
 
 INSERT INTO users (id, email, password_hash, first_name, last_name, role) VALUES
   (1, 'admin@edupulse.demo', @demo_password_hash, 'System', 'Administrator', 'admin'),

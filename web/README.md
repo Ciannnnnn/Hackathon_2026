@@ -44,6 +44,12 @@ Primary routes:
 - `/student/dashboard` - personal learning pulse and study plan
 - `/admin/dashboard` - lightweight system overview
 
+## Phase 5 performance analysis
+
+Teachers have a searchable and filterable student roster at `/teacher/students`. The protected student detail route `/teacher/students/{student}` includes performance metrics, history charts, weak topics, recommendations, active study-plan context, and a validated form for recording dated snapshots.
+
+Every new snapshot receives a provisional rules-based academic support level so the workflow remains demonstrable before the Phase 6 machine-learning service is connected. Teacher ownership is checked for both page access and writes; a teacher cannot inspect or update a learner outside their active classes.
+
 Run the test suite and code formatter with:
 
 ```powershell

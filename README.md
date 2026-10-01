@@ -4,7 +4,7 @@ EduPulse AI is an AI-powered educational support platform for identifying studen
 
 ## Project status
 
-Phases 1 through 4 are complete. EduPulse now has a normalized demo database, schema-compatible Laravel data layer, secure role authentication, a polished landing page, responsive role-aware navigation, and database-backed teacher and student dashboards with interactive analytics.
+Phases 1 through 5 are complete. EduPulse now has a normalized demo database, schema-compatible Laravel data layer, secure role authentication, a polished landing page, responsive role-aware navigation, database-backed dashboards, and a complete teacher workflow for reviewing students and recording academic performance snapshots.
 
 ## Architecture
 
@@ -73,6 +73,12 @@ The teacher dashboard aggregates active enrollments and the latest performance s
 
 Dashboard charts use Chart.js through the Vite bundle. Empty and partially configured accounts receive useful empty states instead of hard failures.
 
+## Student performance and analysis
+
+Teachers can open `GET /teacher/students` to search and filter learners by subject or academic support level. Each student analysis page shows the latest attendance, quiz, assignment, activity, submissions, trend, weak topics, recommendations, study plan, and historical performance chart.
+
+Teachers can record or update a dated performance snapshot from the analysis page. Inputs are validated and restricted to students actively enrolled in one of the signed-in teacher's subjects. Until the trained classifier is connected in Phase 6, new snapshots receive a transparent `rules_fallback` academic support level. This provisional result is educational only and is never described as a medical, psychological, or behavioral diagnosis.
+
 ## Demo data
 
 The seed contains one admin, one teacher, ten students, two subjects, attendance, assignment submissions, quiz results, performance snapshots, support analyses, recommendations, study plans, module chunks, tutor history, and a generated quiz.
@@ -93,7 +99,7 @@ EduPulse123!
 2. Laravel foundation and MySQL integration - complete
 3. Authentication and role authorization - complete
 4. Blade layouts, landing page, and dashboards - complete
-5. Performance records and student analysis
+5. Performance records and student analysis - complete
 6. Python ML service and Laravel integration
 7. Gemini integration
 8. AI analysis and study plans

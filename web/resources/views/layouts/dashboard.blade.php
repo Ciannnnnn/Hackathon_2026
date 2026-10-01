@@ -13,7 +13,7 @@
         $navigation = match ($role) {
             'teacher' => [
                 ['label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'teacher.dashboard'],
-                ['label' => 'Students', 'icon' => 'users'],
+                ['label' => 'Students', 'icon' => 'users', 'route' => 'teacher.students.index', 'active' => 'teacher.students.*'],
                 ['label' => 'Learning Analytics', 'icon' => 'chart'],
                 ['label' => 'Modules', 'icon' => 'book'],
                 ['label' => 'AI Insights', 'icon' => 'sparkles'],
@@ -54,7 +54,7 @@
             @foreach ($navigation as $item)
                 @php
                     $available = isset($item['route']);
-                    $active = $available && request()->routeIs($item['route']);
+                    $active = $available && request()->routeIs($item['active'] ?? $item['route']);
                 @endphp
                 <a
                     href="{{ $available ? route($item['route']) : '#' }}"
@@ -110,6 +110,12 @@
         </header>
 
         <main class="px-5 py-7 sm:px-8 lg:px-10 lg:py-9">
+            @if (session('status'))
+                <div class="mb-6 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm text-emerald-800 shadow-sm" role="status">
+                    <span class="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-emerald-600 text-white"><x-icon name="check" class="h-3.5 w-3.5" /></span>
+                    <span>{{ session('status') }}</span>
+                </div>
+            @endif
             @yield('content')
         </main>
     </div>

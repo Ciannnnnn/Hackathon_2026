@@ -3,7 +3,9 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\StudentDashboardController;
+use App\Http\Controllers\StudentPerformanceController;
 use App\Http\Controllers\TeacherDashboardController;
+use App\Http\Controllers\TeacherStudentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -22,6 +24,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/teacher/dashboard', TeacherDashboardController::class)
         ->middleware('role:teacher')
         ->name('teacher.dashboard');
+
+    Route::middleware('role:teacher')->prefix('teacher')->name('teacher.')->group(function () {
+        Route::get('/students', [TeacherStudentController::class, 'index'])->name('students.index');
+        Route::get('/students/{student}', [TeacherStudentController::class, 'show'])->name('students.show');
+        Route::post('/students/{student}/performance', [StudentPerformanceController::class, 'store'])
+            ->name('students.performance.store');
+    });
 
     Route::get('/student/dashboard', StudentDashboardController::class)
         ->middleware('role:student')

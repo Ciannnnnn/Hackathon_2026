@@ -111,7 +111,7 @@
                                     <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold {{ $trendTone }}">{{ $student['trend_label'] }}</span>
                                 </td>
                                 <td class="px-4 py-4"><x-support-badge :level="$student['support_level']" /></td>
-                                <td class="px-6 py-4 text-right"><span class="inline-grid h-8 w-8 place-items-center rounded-lg text-slate-400 transition group-hover:bg-white group-hover:text-cyan-600 group-hover:shadow-sm"><x-icon name="arrow" class="h-4 w-4" /></span></td>
+                                <td class="px-6 py-4 text-right"><a href="{{ route('teacher.students.show', $student['id']) }}" class="inline-grid h-8 w-8 place-items-center rounded-lg text-slate-400 transition group-hover:bg-white group-hover:text-cyan-600 group-hover:shadow-sm" aria-label="View {{ $student['name'] }} analysis"><x-icon name="arrow" class="h-4 w-4" /></a></td>
                             </tr>
                         @endforeach
                     </tbody>
