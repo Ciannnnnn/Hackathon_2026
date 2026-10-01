@@ -16,6 +16,12 @@ class AdminDashboardController extends Controller
                 'teachers' => User::query()->where('role', 'teacher')->count(),
                 'inactive' => User::query()->where('is_active', false)->count(),
             ],
+            'ai' => [
+                'configured' => filled(config('services.gemini.key')),
+                'provider' => config('services.ai.provider'),
+                'model' => config('services.gemini.model'),
+                'fallback' => (bool) config('services.gemini.demo_fallback'),
+            ],
         ]);
     }
 }

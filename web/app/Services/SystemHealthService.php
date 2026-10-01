@@ -50,7 +50,9 @@ class SystemHealthService
             'integrations' => [
                 'gemini' => [
                     'configured' => filled(config('services.gemini.key')),
+                    'provider' => config('services.ai.provider'),
                     'model' => config('services.gemini.model'),
+                    'demo_fallback' => (bool) config('services.gemini.demo_fallback'),
                 ],
                 'ml_service' => [
                     'configured' => (bool) config('services.ml.enabled') && filled(config('services.ml.url')),

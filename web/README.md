@@ -66,6 +66,22 @@ ML_SERVICE_URL=http://localhost:5001
 ML_SERVICE_TIMEOUT=5
 ```
 
+## Phase 7 Gemini integration
+
+The provider-neutral `AiService` supports student analysis, study-plan generation, quiz generation, weak-topic explanations, and tutor answers. `GeminiProvider` sends server-side REST requests using the `x-goog-api-key` header, supports schema-controlled JSON responses, records non-sensitive model/token metadata, and rejects malformed results.
+
+Required local configuration:
+
+```env
+AI_PROVIDER=gemini
+GEMINI_API_KEY=your_key_here
+GEMINI_MODEL=gemini-3.5-flash
+GEMINI_FALLBACK_MODELS=gemini-3.1-flash-lite
+AI_DEMO_FALLBACK=true
+```
+
+Run `php artisan config:clear` after updating `.env`. Administrators can check readiness and test the real connection from `/admin/dashboard`. The API key is never included in health responses, logs, rendered pages, or browser requests.
+
 Run the test suite and code formatter with:
 
 ```powershell

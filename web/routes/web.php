@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AiIntegrationController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredStudentController;
 use App\Http\Controllers\DashboardRedirectController;
@@ -46,5 +47,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
         Route::patch('/users/{user}/status', [AdminUserController::class, 'toggleStatus'])->name('users.status');
+        Route::post('/integrations/gemini/test', AiIntegrationController::class)->name('integrations.gemini.test');
     });
 });

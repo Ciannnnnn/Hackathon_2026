@@ -35,10 +35,21 @@ return [
         ],
     ],
 
+    'ai' => [
+        'provider' => env('AI_PROVIDER', 'gemini'),
+    ],
+
     'gemini' => [
         'key' => env('GEMINI_API_KEY'),
-        'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
+        'model' => env('GEMINI_MODEL', 'gemini-3.5-flash'),
+        'fallback_models' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('GEMINI_FALLBACK_MODELS', 'gemini-3.1-flash-lite')),
+        ))),
         'demo_fallback' => env('AI_DEMO_FALLBACK', true),
+        'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
+        'timeout' => (int) env('GEMINI_TIMEOUT', 15),
+        'max_output_tokens' => (int) env('GEMINI_MAX_OUTPUT_TOKENS', 2048),
     ],
 
     'ml' => [

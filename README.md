@@ -4,7 +4,7 @@ EduPulse AI is an AI-powered educational support platform for identifying studen
 
 ## Project status
 
-Phases 1 through 6 are complete. EduPulse now has a normalized demo database, secure role authentication, administrator account provisioning, responsive role-aware dashboards, teacher performance-analysis workflows, and a real Random Forest service for predicting academic support levels.
+Phases 1 through 7 are complete. EduPulse now has a normalized demo database, secure role authentication, account provisioning, responsive role-aware dashboards, teacher performance-analysis workflows, a real Random Forest classifier, and a provider-neutral generative AI layer connected to Gemini.
 
 ## Architecture
 
@@ -98,6 +98,32 @@ python app.py
 
 Laravel uses `ML_SERVICE_ENABLED`, `ML_SERVICE_URL`, and `ML_SERVICE_TIMEOUT` from `web/.env`. Keep the default URL `http://localhost:5001` for local development.
 
+## Gemini generative AI
+
+Phase 7 adds a server-side Gemini provider and a reusable AI service with methods for student analysis, seven-day study plans, quiz generation, topic explanations, and grounded tutor answers. Gemini requests use structured output where practical, and every response is validated before it can be consumed by later phases. API keys are sent only from Laravel and are never exposed to browser JavaScript.
+
+Create a Gemini API key in Google AI Studio, then add it to `web/.env`:
+
+```env
+AI_PROVIDER=gemini
+GEMINI_API_KEY=your_key_here
+GEMINI_MODEL=gemini-3.5-flash
+GEMINI_FALLBACK_MODELS=gemini-3.1-flash-lite
+GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta
+GEMINI_TIMEOUT=15
+GEMINI_MAX_OUTPUT_TOKENS=2048
+AI_DEMO_FALLBACK=true
+```
+
+Clear cached configuration after changing the environment:
+
+```powershell
+cd web
+php artisan config:clear
+```
+
+Sign in as an administrator and use the **Test Gemini** control on `/admin/dashboard`. If Gemini is missing, unavailable, rate-limited, or returns malformed output, the application can use clearly marked local demo fallback content instead of crashing. Phase 8 will persist AI-generated student explanations, recommendations, and study plans.
+
 ## Demo data
 
 The seed contains one admin, one teacher, ten students, two subjects, attendance, assignment submissions, quiz results, performance snapshots, support analyses, recommendations, study plans, module chunks, tutor history, and a generated quiz.
@@ -120,7 +146,7 @@ EduPulse123!
 4. Blade layouts, landing page, and dashboards - complete
 5. Performance records and student analysis - complete
 6. Python ML service and Laravel integration - complete
-7. Gemini integration
+7. Gemini integration - complete
 8. AI analysis and study plans
 9. PDF upload and extraction
 10. Retrieval-augmented AI tutor
