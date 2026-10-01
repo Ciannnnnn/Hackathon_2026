@@ -27,16 +27,17 @@ Laravel is the public application. It owns authentication, role authorization, M
 
 ## Local setup
 
-Install the database through phpMyAdmin, or from PowerShell:
+Create the local database through phpMyAdmin, or from PowerShell, then import the portable schema and demo data:
 
 ```powershell
-cmd /c "mysql -u root -p < database\schema.sql"
+cmd /c "mysql -u root -p -e \"CREATE DATABASE IF NOT EXISTS edupulse_ai CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci\""
+cmd /c "mysql -u root -p edupulse_ai < database\schema.sql"
 cmd /c "mysql -u root -p edupulse_ai < database\seed.sql"
 ```
 
-The schema script recreates the `edupulse_ai` database. Do not run it over data that must be preserved.
+The schema script creates tables in whichever empty database you select. It never creates or drops the database. Do not import it over an existing populated schema.
 
-For the complete hackathon demo, import `database/schema.sql` and then `database/seed.sql`. The Laravel migrations currently cover the authentication and academic core tables used by automated tests; feature-specific migrations will be added with their phases. Do not run the current migrations over a database already created from `schema.sql`.
+For the existing local hackathon demo, import `database/schema.sql` and then `database/seed.sql`. For a new empty Laravel Cloud database, use `php artisan migrate --force`; the migrations now cover the complete application schema. Do not mix the two initialization methods in the same database.
 
 Configure Laravel in `web/.env`. The committed template is `web/.env.example`; keep passwords and API keys only in the ignored `.env` file or the hosting provider's environment settings.
 
@@ -176,11 +177,11 @@ New quizzes can remain drafts while the teacher reviews the answer key, explanat
 
 ## Production deployment
 
-The Laravel application includes a production [Dockerfile](web/Dockerfile), Railway service configuration, optimized startup caching, `/up` liveness checks, `/api/health` dependency diagnostics, and baseline browser security headers. Deploy with the Railway service root set to `web/`; deploy `ml-service/` and `rag-service/` as separate services using their existing Procfiles.
+Deploy `web/` as the Laravel Cloud application directory and attach the Laravel Cloud MySQL database cluster to the same environment. Use the cluster connection details in Laravel Cloud's environment variables; the local XAMPP values in `web/.env` are not uploaded or reused.
 
-Import `database/schema.sql` once into the production MySQL database. Import `database/seed.sql` only for the hackathon demo environment. Because the complete SQL schema does not use Laravel's migration ledger, do not run `php artisan migrate` over that imported database.
+After attaching an empty cluster, run `php artisan migrate --force` from the Laravel Cloud environment. This creates the complete schema and records its migration history. Keep `database/schema.sql` and `database/seed.sql` for the existing local/demo workflow; do not import those files into the same cluster after running migrations.
 
-At minimum, configure production values for `APP_KEY`, `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL`, the `DB_*` connection, `SESSION_SECURE_COOKIE=true`, `GEMINI_API_KEY`, `ML_SERVICE_URL`, and `RAG_SERVICE_URL`. Attach persistent storage at `/var/www/html/storage/app/private` so uploaded teacher PDFs survive container redeployments. See [DEPLOYMENT.md](DEPLOYMENT.md) for the complete checklist and rollback notes.
+At minimum, configure production values for `APP_KEY`, `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL`, the `DB_*` connection, `SESSION_SECURE_COOKIE=true`, and `GEMINI_API_KEY`. The ML and RAG URLs are optional supporting services; Laravel remains the only public application. See [DEPLOYMENT.md](DEPLOYMENT.md) for the Laravel Cloud checklist.
 
 ## Hackathon demo flow
 

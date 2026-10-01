@@ -1,7 +1,6 @@
 -- EduPulse AI - deterministic hackathon demo data
 -- Run after schema.sql. All demo accounts use: EduPulse123!
 
-USE edupulse_ai;
 START TRANSACTION;
 
 SET @demo_password_hash = '$2y$10$RYTKd64X.mfLQA3wkvkw4eft0DEgfO4vga2V7dJEHhMxtMmzBwfPu';

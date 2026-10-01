@@ -1,11 +1,8 @@
 -- EduPulse AI - MySQL 8 schema
--- WARNING: this script recreates the development database.
+-- Run while connected to the intended empty database.
+-- This portable script creates tables but never drops or creates a database.
 
-DROP DATABASE IF EXISTS edupulse_ai;
-CREATE DATABASE edupulse_ai
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
-USE edupulse_ai;
+SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE users (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

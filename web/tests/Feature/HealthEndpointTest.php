@@ -19,14 +19,14 @@ class HealthEndpointTest extends TestCase
             ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     }
 
-    public function test_diagnostic_endpoint_reports_an_incomplete_schema_without_leaking_secrets(): void
+    public function test_diagnostic_endpoint_reports_a_complete_schema_without_leaking_secrets(): void
     {
         $response = $this->getJson('/api/health');
 
         $response
-            ->assertServiceUnavailable()
-            ->assertJsonPath('status', 'degraded')
-            ->assertJsonPath('database.status', 'schema_incomplete')
+            ->assertOk()
+            ->assertJsonPath('status', 'ok')
+            ->assertJsonPath('database.status', 'ready')
             ->assertJsonStructure([
                 'application' => ['name', 'environment', 'laravel_version'],
                 'database' => ['status', 'connection', 'database', 'latency_ms', 'missing_tables'],
@@ -35,7 +35,7 @@ class HealthEndpointTest extends TestCase
             ]);
 
         $this->assertStringNotContainsString('password', strtolower($response->getContent()));
-        $this->assertContains('attendance', $response->json('database.missing_tables'));
+        $this->assertSame([], $response->json('database.missing_tables'));
     }
 
     public function test_diagnostic_endpoint_handles_an_unavailable_database_without_crashing(): void
