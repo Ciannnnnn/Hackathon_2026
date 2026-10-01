@@ -109,6 +109,12 @@ RAG_SERVICE_TIMEOUT=20
 MAX_PDF_SIZE_MB=10
 ```
 
+## Phase 10 retrieval-augmented tutor
+
+Actively enrolled students use `/student/tutor` to ask questions within a selected subject. `ModuleChunkRetriever` performs subject-scoped lexical ranking over chunks belonging only to ready modules, and `TutorService` sends the highest-ranked passages plus bounded recent conversation history to `AiService`.
+
+Each assistant message stores only its actual source references and short excerpts in `retrieved_context`. The interface renders those records as module-and-page source cards. When retrieval returns no match, the answer is marked as general guidance and `retrieved_context` remains null. Conversation and question requests verify student ownership, active enrollment, and subject consistency before retrieval or generation begins.
+
 Run the test suite and code formatter with:
 
 ```powershell

@@ -53,10 +53,10 @@
                     <span class="grid h-9 w-9 place-items-center rounded-lg bg-indigo-50 text-indigo-600"><x-icon name="calendar" class="h-4 w-4" /></span>
                     <p class="mt-3 text-sm font-semibold text-slate-800">Study plan</p><p class="mt-1 text-xs text-slate-400">Continue today's task</p>
                 </a>
-                <div class="cursor-not-allowed rounded-xl border border-slate-200 p-4 opacity-70">
+                <a href="{{ route('student.tutor.index') }}" class="group rounded-xl border border-slate-200 p-4 transition hover:border-cyan-200 hover:bg-cyan-50/50">
                     <span class="grid h-9 w-9 place-items-center rounded-lg bg-cyan-50 text-cyan-600"><x-icon name="bot" class="h-4 w-4" /></span>
-                    <p class="mt-3 text-sm font-semibold text-slate-800">AI Tutor</p><p class="mt-1 text-xs text-slate-400">Coming in Phase 10</p>
-                </div>
+                    <p class="mt-3 text-sm font-semibold text-slate-800">AI Tutor</p><p class="mt-1 text-xs text-slate-400">Ask from class materials</p>
+                </a>
             </div>
         </article>
     </section>

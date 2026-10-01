@@ -78,6 +78,8 @@ class GeminiProvider implements GenerativeAiProvider
         $selectedModel = $model;
 
         foreach ($models as $index => $candidateModel) {
+            $hasAnotherModel = $index < $models->count() - 1;
+
             try {
                 $response = Http::acceptJson()
                     ->asJson()
@@ -86,6 +88,10 @@ class GeminiProvider implements GenerativeAiProvider
                     ->timeout((int) config('services.gemini.timeout', 15))
                     ->post($this->endpoint($candidateModel), $payload);
             } catch (ConnectionException $exception) {
+                if ($hasAnotherModel) {
+                    continue;
+                }
+
                 throw new AiProviderException('Gemini is temporarily unreachable.', previous: $exception);
             } catch (Throwable $exception) {
                 throw new AiProviderException('Gemini request failed unexpectedly.', previous: $exception);
@@ -97,7 +103,6 @@ class GeminiProvider implements GenerativeAiProvider
                 break;
             }
 
-            $hasAnotherModel = $index < $models->count() - 1;
             if (! $hasAnotherModel || ! $this->shouldTryNextModel($response)) {
                 $this->ensureSuccessful($response);
             }

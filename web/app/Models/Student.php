@@ -43,4 +43,9 @@ class Student extends Model
     {
         return $this->hasMany(StudyPlan::class);
     }
+
+    public function conversations(): HasMany
+    {
+        return $this->hasMany(ChatConversation::class);
+    }
 }

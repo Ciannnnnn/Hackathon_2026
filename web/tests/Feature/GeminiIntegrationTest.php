@@ -109,6 +109,27 @@ class GeminiIntegrationTest extends TestCase
         Http::assertSentCount(2);
     }
 
+    public function test_provider_uses_a_fallback_model_when_primary_connection_times_out(): void
+    {
+        config(['services.gemini.fallback_models' => ['gemini-fallback-model']]);
+        Http::fake([
+            'https://gemini.test/v1beta/models/gemini-test-model:generateContent' => Http::failedConnection('Timed out'),
+            'https://gemini.test/v1beta/models/gemini-fallback-model:generateContent' => Http::response([
+                'candidates' => [[
+                    'content' => ['parts' => [['text' => 'Fallback connection ready']]],
+                    'finishReason' => 'STOP',
+                ]],
+                'modelVersion' => 'gemini-fallback-model-connection-001',
+            ]),
+        ]);
+
+        $result = (new GeminiProvider)->generateText('System instruction', 'Connectivity check');
+
+        $this->assertSame('Fallback connection ready', $result->content);
+        $this->assertSame('gemini-fallback-model-connection-001', $result->model);
+        Http::assertSentCount(2);
+    }
+
     public function test_ai_errors_are_propagated_when_demo_fallback_is_disabled(): void
     {
         config(['services.gemini.demo_fallback' => false]);

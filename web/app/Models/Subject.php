@@ -57,4 +57,9 @@ class Subject extends Model
     {
         return $this->hasMany(LearningModule::class);
     }
+
+    public function conversations(): HasMany
+    {
+        return $this->hasMany(ChatConversation::class);
+    }
 }

@@ -22,7 +22,7 @@
             'student' => [
                 ['label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'student.dashboard'],
                 ['label' => 'Study Plan', 'icon' => 'calendar'],
-                ['label' => 'AI Tutor', 'icon' => 'bot'],
+                ['label' => 'AI Tutor', 'icon' => 'bot', 'route' => 'student.tutor.index', 'active' => 'student.tutor.*'],
                 ['label' => 'Practice Quiz', 'icon' => 'quiz'],
                 ['label' => 'Progress', 'icon' => 'trend'],
             ],

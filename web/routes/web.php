@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\StudentInsightController;
 use App\Http\Controllers\StudentPerformanceController;
+use App\Http\Controllers\StudentTutorController;
 use App\Http\Controllers\TeacherDashboardController;
 use App\Http\Controllers\TeacherGradebookController;
 use App\Http\Controllers\TeacherModuleController;
@@ -59,6 +60,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/student/dashboard', StudentDashboardController::class)
         ->middleware('role:student')
         ->name('student.dashboard');
+
+    Route::middleware('role:student')->prefix('student')->name('student.')->group(function () {
+        Route::get('/tutor', [StudentTutorController::class, 'index'])->name('tutor.index');
+        Route::post('/tutor/questions', [StudentTutorController::class, 'store'])
+            ->middleware('throttle:10,1')
+            ->name('tutor.store');
+    });
 
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');

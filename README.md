@@ -4,7 +4,7 @@ EduPulse AI is an AI-powered educational support platform for identifying studen
 
 ## Project status
 
-Phases 1 through 9 are complete. EduPulse now has a normalized demo database, secure role authentication, account provisioning, managed subjects and enrollments, a teacher gradebook, private PDF learning-material uploads and extraction, responsive role-aware dashboards, a real Random Forest classifier, Gemini integration, and persisted AI-generated academic explanations, recommendations, and seven-day study plans.
+Phases 1 through 10 are complete. EduPulse now has a normalized demo database, secure role authentication, account provisioning, managed subjects and enrollments, a teacher gradebook, private PDF learning-material uploads and extraction, a source-grounded conversational AI tutor, responsive role-aware dashboards, a real Random Forest classifier, Gemini integration, and persisted AI-generated academic explanations, recommendations, and seven-day study plans.
 
 ## Architecture
 
@@ -158,6 +158,14 @@ python app.py
 
 The default service URL is `http://localhost:5002`. Phase 9 supports text-based PDFs; OCR for scanned image documents is intentionally outside the current scope.
 
+## Retrieval-augmented AI tutor
+
+Phase 10 adds a student-only tutor at `/student/tutor`. Students can access only subjects in which they have an active enrollment. For every question, EduPulse searches text chunks from ready modules in the selected subject, ranks matching passages, and sends only the best passages, recent conversation history, and current question to Gemini.
+
+Tutor answers are persisted with their conversation. Grounded answers display separate source cards containing the teacher module title, PDF page, and a short source excerpt. If no relevant passage is found, the answer is explicitly labeled as general guidance and no fabricated source is attached. Retrieved PDF text is treated as untrusted reference content so instructions embedded inside a document cannot override the tutor's system rules.
+
+Conversation access is student-scoped and subject-scoped. Students cannot open another learner's history, query an unenrolled subject, or retrieve passages across subject boundaries. The tutor can still use the configured demo fallback if Gemini is temporarily unavailable.
+
 ## Demo data
 
 The seed contains one admin, one teacher, ten students, two subjects, attendance, assignment submissions, quiz results, performance snapshots, support analyses, recommendations, study plans, module chunks, tutor history, and a generated quiz. It is sample content for demonstrating the application; administrators and teachers can replace it with managed subjects, enrollments, and grade entries from the interface.
@@ -183,6 +191,6 @@ EduPulse123!
 7. Gemini integration - complete
 8. AI analysis and study plans - complete
 9. PDF upload and extraction - complete
-10. Retrieval-augmented AI tutor
+10. Retrieval-augmented AI tutor - complete
 11. AI-generated quizzes
 12. Analytics, polish, deployment, and demo hardening
