@@ -21,6 +21,18 @@ Database and integration readiness: `GET /api/health`. This endpoint deliberatel
 
 The Laravel `User` model uses the Phase 1 columns `first_name`, `last_name`, `role`, and `password_hash`. Core models and relationships are available for teachers, students, subjects, enrollments, performance snapshots, and academic support analyses.
 
+## Phase 3 authentication
+
+The application provides rate-limited session login at `GET /login`, secure logout through `POST /logout`, and role-protected dashboards for students, teachers, and administrators. Only active accounts can sign in or retain access to a role dashboard.
+
+Production HTTPS deployments should set:
+
+```env
+SESSION_SECURE_COOKIE=true
+SESSION_HTTP_ONLY=true
+SESSION_SAME_SITE=lax
+```
+
 Run the test suite and code formatter with:
 
 ```powershell

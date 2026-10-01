@@ -4,7 +4,7 @@ EduPulse AI is an AI-powered educational support platform for identifying studen
 
 ## Project status
 
-Phases 1 and 2 are complete. The normalized MySQL schema and deterministic demo data are ready, and Laravel now has a schema-compatible authentication model, academic core models, Eloquent relationships, migrations, service configuration, and resilient health diagnostics.
+Phases 1 through 3 are complete. The normalized MySQL schema and deterministic demo data are ready; Laravel now has a schema-compatible data layer, resilient health diagnostics, secure session authentication, login throttling, and student/teacher/admin route authorization.
 
 ## Architecture
 
@@ -61,6 +61,12 @@ Health endpoints:
 
 On Railway, either configure `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD`, or map Railway's MySQL connection URL to Laravel's `DB_URL` variable.
 
+## Authentication
+
+Open `http://localhost:8000/login` after importing the complete schema and seed data. Successful logins are redirected to the dashboard for the account's role. Inactive accounts and cross-role dashboard access are rejected.
+
+Authentication uses Laravel's server-side session guard with CSRF protection, regenerated sessions after login, invalidated sessions on logout, bcrypt-compatible password verification, and per-email/IP login throttling. On an HTTPS deployment, set `SESSION_SECURE_COOKIE=true`.
+
 ## Demo data
 
 The seed contains one admin, one teacher, ten students, two subjects, attendance, assignment submissions, quiz results, performance snapshots, support analyses, recommendations, study plans, module chunks, tutor history, and a generated quiz.
@@ -79,7 +85,7 @@ EduPulse123!
 
 1. Project structure and database schema - complete
 2. Laravel foundation and MySQL integration - complete
-3. Authentication and role authorization
+3. Authentication and role authorization - complete
 4. Blade layouts, landing page, and dashboards
 5. Performance records and student analysis
 6. Python ML service and Laravel integration
