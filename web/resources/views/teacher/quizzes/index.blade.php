@@ -30,7 +30,7 @@
         <section class="dashboard-panel mt-7 overflow-hidden">
             <div class="border-b border-slate-100 px-5 py-5 sm:px-6">
                 <h2 class="font-semibold text-slate-900">Create a grounded quiz for {{ $selectedSubject->code }}</h2>
-                <p class="mt-1 text-xs leading-5 text-slate-400">Only ready modules with extracted text are available. Generation can take a few seconds.</p>
+                <p class="mt-1 text-xs leading-5 text-slate-400">Only ready modules with extracted text are available. Generation runs in the background in production, so you can safely leave or refresh this page.</p>
             </div>
             @if ($modules->isNotEmpty())
                 <form method="POST" action="{{ route('teacher.quizzes.store') }}" data-loading-form data-loading-text="Generating quiz…" class="grid gap-5 p-5 sm:grid-cols-2 sm:p-6 xl:grid-cols-6">

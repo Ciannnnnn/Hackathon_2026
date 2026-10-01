@@ -54,6 +54,9 @@ SESSION_SECURE_COOKIE=true
 SESSION_HTTP_ONLY=true
 SESSION_SAME_SITE=lax
 
+QUEUE_CONNECTION=database
+DB_QUEUE_RETRY_AFTER=90
+
 AI_PROVIDER=gemini
 GEMINI_API_KEY=replace_me
 GEMINI_MODEL=gemini-3.5-flash
@@ -74,6 +77,18 @@ RAG_EXTRACTION_DRIVER=local
 ```
 
 The rules fallback replaces the ML call. The `local` PDF extraction driver processes text-based PDFs directly inside Laravel, so new module uploads do not require a separate Python RAG deployment. Set `RAG_EXTRACTION_DRIVER=service` only when a reachable RAG service URL has been deployed.
+
+### Run AI quiz generation in the background
+
+AI quiz generation must use a queue worker in production so a slow Gemini response cannot exceed the web request timeout. The standard `jobs` and `failed_jobs` tables are already included in the migrations.
+
+In the Laravel Cloud Production environment, add a background process to the application cluster with this command:
+
+```text
+php artisan queue:work database --queue=ai,default --sleep=1 --tries=2 --timeout=75 --max-time=3600
+```
+
+Keep `QUEUE_CONNECTION=database`, redeploy, and confirm the worker is running. The quiz form will then return immediately while the worker generates and saves the grounded quiz. Restart workers after deployments so they load the new application code.
 
 ## 4. Verify the deployment
 

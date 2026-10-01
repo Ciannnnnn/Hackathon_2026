@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Contracts\GenerativeAiProvider;
 use App\Data\AiResult;
+use App\Jobs\GenerateGroundedQuiz;
 use App\Models\Enrollment;
 use App\Models\GeneratedQuiz;
 use App\Models\LearningModule;
@@ -13,6 +14,7 @@ use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class GeneratedQuizTest extends TestCase
@@ -65,6 +67,31 @@ class GeneratedQuizTest extends TestCase
 
         $this->assertDatabaseCount('generated_quizzes', 0);
         $this->assertDatabaseCount('generated_quiz_questions', 0);
+    }
+
+    public function test_production_queue_returns_before_generating_the_quiz(): void
+    {
+        Queue::fake();
+        config(['queue.default' => 'database']);
+        [$teacherUser, , $subject] = $this->teacherSubject('QUEUE');
+        [$module] = $this->moduleWithChunk($subject, 'Queued generation should not block the web request.');
+
+        $response = $this->actingAs($teacherUser)->post(route('teacher.quizzes.store'), [
+            'subject_id' => $subject->id,
+            'module_id' => $module->id,
+            'title' => 'Queued Review',
+            'topic' => 'Queues',
+            'difficulty' => 'medium',
+            'question_count' => 3,
+            'is_published' => '0',
+        ]);
+
+        $response->assertRedirect(route('teacher.quizzes.index', ['subject' => $subject->id]));
+        $response->assertSessionHas('status', fn (string $message): bool => str_contains($message, 'background'));
+        $this->assertDatabaseCount('generated_quizzes', 0);
+        Queue::assertPushed(GenerateGroundedQuiz::class, fn (GenerateGroundedQuiz $job): bool => $job->module->is($module)
+            && $job->creator->is($teacherUser)
+            && $job->queue === 'ai');
     }
 
     public function test_enrolled_student_can_take_a_published_quiz_and_review_results(): void

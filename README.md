@@ -175,6 +175,8 @@ Phase 11 adds a teacher quiz workspace at `/teacher/quizzes` and a student pract
 
 New quizzes can remain drafts while the teacher reviews the answer key, explanations, and source pages. Publishing makes the quiz available only to actively enrolled students in that subject. Student responses are graded immediately, saved as attempt history, and shown with correct answers, explanations, weak-topic guidance, and the module page to review. Drafts, other subjects, and another student's results are not accessible.
 
+In production, quiz generation is dispatched to the `ai` queue so slow Gemini responses cannot time out the teacher's web request. Configure `QUEUE_CONNECTION=database` and run `php artisan queue:work database --queue=ai,default --sleep=1 --tries=2 --timeout=75 --max-time=3600`. Local development may keep `QUEUE_CONNECTION=sync` to generate within the request.
+
 ## Production deployment
 
 Deploy `web/` as the Laravel Cloud application directory and attach the Laravel Cloud MySQL database cluster to the same environment. Use the cluster connection details in Laravel Cloud's environment variables; the local XAMPP values in `web/.env` are not uploaded or reused.

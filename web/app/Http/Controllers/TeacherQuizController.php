@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreGeneratedQuizRequest;
+use App\Jobs\GenerateGroundedQuiz;
 use App\Models\GeneratedQuiz;
 use App\Models\LearningModule;
-use App\Services\QuizGenerationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -26,12 +26,19 @@ class TeacherQuizController extends Controller
         return view('teacher.quizzes.index', compact('subjects', 'selectedSubject', 'modules', 'quizzes'));
     }
 
-    public function store(StoreGeneratedQuizRequest $request, QuizGenerationService $generator): RedirectResponse
+    public function store(StoreGeneratedQuizRequest $request): RedirectResponse
     {
-        $quiz = $generator->generate($request->user(), LearningModule::findOrFail($request->validated('module_id')), $request->validated());
+        $data = $request->validated();
+        $module = LearningModule::findOrFail($data['module_id']);
 
-        return redirect()->route('teacher.quizzes.index', ['subject' => $quiz->subject_id])
-            ->with('status', "{$quiz->title} was generated".($quiz->is_published ? ' and published.' : ' as a draft.'));
+        GenerateGroundedQuiz::dispatch($request->user(), $module, $data);
+
+        $message = config('queue.default') === 'sync'
+            ? "{$data['title']} was generated".($data['is_published'] ? ' and published.' : ' as a draft.')
+            : "{$data['title']} is being generated in the background. Refresh this page shortly to review it.";
+
+        return redirect()->route('teacher.quizzes.index', ['subject' => $module->subject_id])
+            ->with('status', $message);
     }
 
     public function togglePublish(Request $request, GeneratedQuiz $quiz): RedirectResponse
