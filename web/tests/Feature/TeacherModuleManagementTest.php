@@ -6,6 +6,8 @@ use App\Models\LearningModule;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
+use App\Services\LocalPdfExtractionService;
+use App\Services\RagExtractionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
@@ -22,6 +24,7 @@ class TeacherModuleManagementTest extends TestCase
         Storage::fake('local');
         config()->set('services.rag.enabled', true);
         config()->set('services.rag.url', 'http://rag.test');
+        config()->set('services.rag.driver', 'service');
     }
 
     public function test_teacher_can_upload_and_extract_a_pdf_for_their_subject(): void
@@ -76,6 +79,31 @@ class TeacherModuleManagementTest extends TestCase
 
         $this->assertSame('ready', $module->fresh()->processing_status);
         $this->assertDatabaseCount('module_chunks', 2);
+    }
+
+    public function test_laravel_native_extractor_creates_page_aware_chunks(): void
+    {
+        $path = 'modules/native-test.pdf';
+        Storage::disk('local')->put($path, $this->pdfWithText('Database normalization reduces duplicated data and update anomalies.'));
+
+        $result = app(LocalPdfExtractionService::class)->extract($path);
+
+        $this->assertSame(1, $result['page_count']);
+        $this->assertSame(1, $result['chunks'][0]['page_number']);
+        $this->assertStringContainsString('Database normalization', $result['chunks'][0]['content']);
+    }
+
+    public function test_auto_driver_falls_back_to_native_extraction_when_remote_service_is_down(): void
+    {
+        config()->set('services.rag.driver', 'auto');
+        Http::fake(['http://rag.test/extract' => Http::failedConnection('Service unavailable')]);
+        $path = 'modules/fallback-test.pdf';
+        Storage::disk('local')->put($path, $this->pdfWithText('Transactions group database operations into one atomic unit.'));
+
+        $result = app(RagExtractionService::class)->extract($path, 'transactions.pdf');
+
+        $this->assertSame(1, $result['page_count']);
+        $this->assertStringContainsString('Transactions group', $result['chunks'][0]['content']);
     }
 
     public function test_teacher_cannot_manage_another_teachers_module(): void
@@ -175,5 +203,33 @@ class TeacherModuleManagementTest extends TestCase
                 ['chunk_index' => 1, 'page_number' => 2, 'content' => 'Second page dependency content.', 'token_count' => 4],
             ],
         ];
+    }
+
+    private function pdfWithText(string $text): string
+    {
+        $escaped = str_replace(['\\', '(', ')'], ['\\\\', '\\(', '\\)'], $text);
+        $stream = "BT /F1 12 Tf 72 720 Td ({$escaped}) Tj ET";
+        $objects = [
+            '<< /Type /Catalog /Pages 2 0 R >>',
+            '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+            '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
+            '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+            '<< /Length '.strlen($stream)." >>\nstream\n{$stream}\nendstream",
+        ];
+        $pdf = "%PDF-1.4\n";
+        $offsets = [0];
+
+        foreach ($objects as $index => $object) {
+            $offsets[] = strlen($pdf);
+            $pdf .= ($index + 1)." 0 obj\n{$object}\nendobj\n";
+        }
+
+        $xref = strlen($pdf);
+        $pdf .= "xref\n0 ".(count($objects) + 1)."\n0000000000 65535 f \n";
+        foreach (array_slice($offsets, 1) as $offset) {
+            $pdf .= sprintf('%010d 00000 n ', $offset)."\n";
+        }
+
+        return $pdf."trailer\n<< /Size ".(count($objects) + 1)." /Root 1 0 R >>\nstartxref\n{$xref}\n%%EOF\n";
     }
 }

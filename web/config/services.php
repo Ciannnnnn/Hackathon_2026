@@ -59,6 +59,7 @@ return [
     ],
 
     'rag' => [
+        'driver' => env('RAG_EXTRACTION_DRIVER', 'local'),
         'enabled' => env('RAG_SERVICE_ENABLED', true),
         'url' => env('RAG_SERVICE_URL', 'http://localhost:5002'),
         'timeout' => (int) env('RAG_SERVICE_TIMEOUT', 20),

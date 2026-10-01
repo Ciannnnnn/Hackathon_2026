@@ -147,7 +147,7 @@ Refreshing insights archives the previous AI plan, replaces pending AI recommend
 
 Phase 9 adds a teacher-only module library at `/teacher/modules`. Teachers select one of their assigned active subjects, upload a text-based PDF of up to `MAX_PDF_SIZE_MB`, and Laravel stores it outside the public web directory with a generated filename. The original filename is retained only for the authorized download response.
 
-Laravel sends the private file to the RAG service at `POST /extract`. The service validates the PDF signature and MIME type, rejects encrypted or image-only documents, extracts selectable text with `pypdf`, and returns overlapping page-aware chunks. Laravel validates the complete response before replacing stored chunks and marking the module ready. Failed files remain visible with a safe error and a retry action. Teachers cannot list, retry, download, or delete another teacher's modules.
+By default, Laravel validates the private PDF, rejects damaged or image-only documents, extracts selectable text with the native PHP parser, and creates overlapping page-aware chunks. A separately deployed RAG service remains available through `RAG_EXTRACTION_DRIVER=service`, while `auto` tries that service before falling back to Laravel. Laravel validates remote responses before replacing stored chunks and marking the module ready. Failed files remain visible with a safe error and a retry action. Teachers cannot list, retry, download, or delete another teacher's modules.
 
 Start the RAG service in a separate terminal before uploading:
 
@@ -159,7 +159,7 @@ python -m pip install -r requirements.txt
 python app.py
 ```
 
-The default service URL is `http://localhost:5002`. Phase 9 supports text-based PDFs; OCR for scanned image documents is intentionally outside the current scope.
+The optional service URL is `http://localhost:5002`. Use `RAG_EXTRACTION_DRIVER=local` for Laravel Cloud. Phase 9 supports text-based PDFs; OCR for scanned image documents is intentionally outside the current scope.
 
 ## Retrieval-augmented AI tutor
 

@@ -5,13 +5,44 @@ namespace App\Services;
 use App\Exceptions\RagServiceException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class RagExtractionService
 {
+    public function __construct(private readonly LocalPdfExtractionService $local) {}
+
     /** @return array{page_count: int, character_count: int, chunks: list<array{chunk_index: int, page_number: int, content: string, token_count: int}>} */
     public function extract(string $filePath, string $originalFilename): array
+    {
+        $driver = (string) config('services.rag.driver', 'local');
+
+        if ($driver === 'local') {
+            return $this->local->extract($filePath);
+        }
+
+        if ($driver === 'auto') {
+            try {
+                return $this->extractRemote($filePath, $originalFilename);
+            } catch (RagServiceException $exception) {
+                Log::warning('Remote PDF extraction failed; using the Laravel-native parser.', [
+                    'exception' => $exception::class,
+                ]);
+
+                return $this->local->extract($filePath);
+            }
+        }
+
+        if ($driver !== 'service') {
+            throw new RagServiceException('The configured PDF extraction driver is invalid.');
+        }
+
+        return $this->extractRemote($filePath, $originalFilename);
+    }
+
+    /** @return array{page_count: int, character_count: int, chunks: list<array{chunk_index: int, page_number: int, content: string, token_count: int}>} */
+    private function extractRemote(string $filePath, string $originalFilename): array
     {
         if (! config('services.rag.enabled') || blank(config('services.rag.url'))) {
             throw new RagServiceException('The PDF extraction service is not enabled.');

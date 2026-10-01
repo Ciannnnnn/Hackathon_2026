@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Smalot\PdfParser\Parser;
 use Throwable;
 
 class SystemHealthService
@@ -58,7 +59,10 @@ class SystemHealthService
                     'configured' => (bool) config('services.ml.enabled') && filled(config('services.ml.url')),
                 ],
                 'rag_service' => [
-                    'configured' => filled(config('services.rag.url')),
+                    'configured' => config('services.rag.driver') === 'local'
+                        ? class_exists(Parser::class)
+                        : (bool) config('services.rag.enabled') && filled(config('services.rag.url')),
+                    'driver' => config('services.rag.driver'),
                 ],
             ],
             'timestamp' => now()->toIso8601String(),

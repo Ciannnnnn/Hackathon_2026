@@ -70,9 +70,10 @@ For a Laravel-only deployment, use:
 ```env
 ML_SERVICE_ENABLED=false
 RAG_SERVICE_ENABLED=false
+RAG_EXTRACTION_DRIVER=local
 ```
 
-The rules fallback replaces the ML call. Existing extracted module chunks remain usable, but new PDFs cannot be extracted until the RAG service is available.
+The rules fallback replaces the ML call. The `local` PDF extraction driver processes text-based PDFs directly inside Laravel, so new module uploads do not require a separate Python RAG deployment. Set `RAG_EXTRACTION_DRIVER=service` only when a reachable RAG service URL has been deployed.
 
 ## 4. Verify the deployment
 
