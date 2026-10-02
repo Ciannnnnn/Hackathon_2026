@@ -71,7 +71,7 @@ class AiService
         string $difficulty = 'medium',
         string $questionType = 'multiple_choice',
     ): AiResult {
-        $count = max(1, min(20, $numberOfQuestions));
+        $count = max(1, min(50, $numberOfQuestions));
         $difficulty = in_array($difficulty, ['easy', 'medium', 'hard'], true) ? $difficulty : 'medium';
         $questionType = in_array($questionType, ['multiple_choice', 'true_false', 'short_answer', 'mixed'], true)
             ? $questionType
@@ -80,7 +80,9 @@ class AiService
             ? ['multiple_choice', 'true_false', 'short_answer']
             : [$questionType];
         $typeInstruction = $questionType === 'mixed'
-            ? 'Use a balanced mix of at least two question types: multiple_choice, true_false, and short_answer.'
+            ? ($count > 1
+                ? 'Use a balanced mix of at least two question types: multiple_choice, true_false, and short_answer.'
+                : 'Use one of these question types: multiple_choice, true_false, or short_answer.')
             : "Every question must use the {$questionType} type.";
 
         return $this->structured(

@@ -97,6 +97,31 @@ class GeneratedQuizTest extends TestCase
             && $job->connection === 'deferred');
     }
 
+    public function test_teacher_can_request_any_whole_number_up_to_fifty_questions(): void
+    {
+        Queue::fake();
+        [$teacherUser, , $subject] = $this->teacherSubject('COUNT');
+        [$module] = $this->moduleWithChunk($subject, 'A larger module can support a longer quiz.');
+        $data = [
+            'subject_id' => $subject->id,
+            'module_id' => $module->id,
+            'title' => 'Long Review',
+            'topic' => 'Comprehensive review',
+            'difficulty' => 'medium',
+            'question_type' => 'multiple_choice',
+            'question_count' => 50,
+        ];
+
+        $this->actingAs($teacherUser)->post(route('teacher.quizzes.store'), $data)
+            ->assertRedirect()
+            ->assertSessionDoesntHaveErrors();
+        Queue::assertPushed(GenerateGroundedQuiz::class, fn (GenerateGroundedQuiz $job): bool => $job->data['question_count'] === 50);
+
+        $this->actingAs($teacherUser)->post(route('teacher.quizzes.store'), [...$data, 'question_count' => 51])
+            ->assertSessionHasErrors('question_count');
+        Queue::assertPushed(GenerateGroundedQuiz::class, 1);
+    }
+
     public function test_teacher_can_choose_the_generated_question_type(): void
     {
         [$teacherUser, , $subject] = $this->teacherSubject('TYPE');

@@ -118,7 +118,7 @@ Each assistant message stores only its actual source references and short excerp
 
 ## Phase 11 grounded AI quizzes
 
-Teachers choose a ready module, topic, difficulty, question count, and question type. Supported formats are multiple choice, true/false, short answer, and mixed. Laravel validates that Gemini returned the requested format and rejects malformed or ungrounded questions before saving the quiz as a draft. Before publishing, the teacher can edit question text, choices, correct answers, and explanations. Editing is locked once the quiz is published or has student attempts.
+Teachers choose a ready module, topic, difficulty, any whole-number question count from 1 to 50, and a question type. Supported formats are multiple choice, true/false, short answer, and mixed. Laravel validates that Gemini returned the requested format and rejects malformed or ungrounded questions before saving the quiz as a draft. Before publishing, the teacher can edit question text, choices, correct answers, and explanations. Editing is locked once the quiz is published or has student attempts.
 
 Run the test suite and code formatter with:
 

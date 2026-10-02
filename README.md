@@ -120,7 +120,7 @@ GEMINI_MODEL=gemini-3.5-flash
 GEMINI_FALLBACK_MODELS=gemini-3.1-flash-lite
 GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta
 GEMINI_TIMEOUT=15
-GEMINI_MAX_OUTPUT_TOKENS=2048
+GEMINI_MAX_OUTPUT_TOKENS=8192
 AI_DEMO_FALLBACK=true
 ```
 
@@ -171,7 +171,7 @@ Conversation access is student-scoped and subject-scoped. Students cannot open a
 
 ## Grounded AI quizzes
 
-Phase 11 adds a teacher quiz workspace at `/teacher/quizzes` and a student practice area at `/student/quizzes`. A teacher chooses a ready module, topic, difficulty, question count, and question type: multiple choice, true/false, short answer, or mixed. Gemini must return the exact requested number and type of questions and cite the numeric source chunk supporting each one. EduPulse rejects incomplete questions, mismatched types, invalid answer choices, and source IDs that were not included in the prompt. Unlike explanatory features, quiz generation never saves demo fallback questions because an assessment must remain grounded in teacher material.
+Phase 11 adds a teacher quiz workspace at `/teacher/quizzes` and a student practice area at `/student/quizzes`. A teacher chooses a ready module, topic, difficulty, any whole-number question count from 1 to 50, and a question type: multiple choice, true/false, short answer, or mixed. Gemini must return the exact requested number and type of questions and cite the numeric source chunk supporting each one. EduPulse rejects incomplete questions, mismatched types, invalid answer choices, and source IDs that were not included in the prompt. Unlike explanatory features, quiz generation never saves demo fallback questions because an assessment must remain grounded in teacher material.
 
 New quizzes remain drafts while the teacher reviews and edits each question, choice list, correct answer, and explanation. Editing is locked after publication or after a student attempt to protect grading history. Publishing makes the quiz available only to actively enrolled students in that subject. Student responses are graded immediately, saved as attempt history, and shown with correct answers, explanations, weak-topic guidance, and the module page to review. Drafts, other subjects, and another student's results are not accessible.
 

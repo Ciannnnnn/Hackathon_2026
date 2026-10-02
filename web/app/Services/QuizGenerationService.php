@@ -124,7 +124,7 @@ class QuizGenerationService
             ];
         })->all();
 
-        if ($requestedType === 'mixed' && collect($validated)->pluck('question_type')->unique()->count() < 2) {
+        if ($requestedType === 'mixed' && $expected > 1 && collect($validated)->pluck('question_type')->unique()->count() < 2) {
             throw ValidationException::withMessages(['quiz' => 'Gemini did not return the requested mix of question types. Please retry.']);
         }
 
