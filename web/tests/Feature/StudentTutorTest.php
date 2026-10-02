@@ -53,8 +53,9 @@ class StudentTutorTest extends TestCase
             ->get(route('student.tutor.index', ['subject' => $subject->id, 'conversation' => $conversation->id]))
             ->assertOk()
             ->assertSee('Normalization organizes tables')
-            ->assertSee('Normalization Module')
-            ->assertSee('page 4');
+            ->assertDontSee('Sources retrieved from your teacher')
+            ->assertDontSee('Normalization Module')
+            ->assertDontSee('page 4');
     }
 
     public function test_unmatched_question_is_saved_as_general_guidance_without_fake_sources(): void
@@ -66,7 +67,7 @@ class StudentTutorTest extends TestCase
         $this->actingAs($studentUser)->post(route('student.tutor.store'), [
             'subject_id' => $subject->id,
             'question' => 'How does photosynthesis work?',
-        ])->assertSessionHas('status', 'No matching module passage was found; the answer is labeled as general guidance.');
+        ])->assertSessionHas('status', 'Tutor answer generated successfully.');
 
         $assistant = ChatMessage::query()->where('role', 'assistant')->sole();
         $this->assertNull($assistant->retrieved_context);
@@ -139,7 +140,7 @@ class StudentTutorTest extends TestCase
         $this->actingAs($studentUser)->post(route('student.tutor.store'), [
             'subject_id' => $subject->id,
             'question' => 'What is a transaction?',
-        ])->assertSessionHas('status', 'The AI provider was unavailable; relevant teacher sources were saved for review.');
+        ])->assertSessionHas('status', 'The AI provider was unavailable, so fallback guidance was saved.');
 
         $assistant = ChatMessage::query()->where('role', 'assistant')->sole();
         $this->assertStringContainsString('temporarily unavailable', $assistant->content);

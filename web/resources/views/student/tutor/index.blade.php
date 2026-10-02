@@ -27,7 +27,7 @@
                     <a href="{{ route('student.tutor.index', ['subject' => $selectedSubject->id]) }}" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-600/20 transition hover:bg-cyan-700"><span class="text-lg leading-none">+</span> New conversation</a>
                     <div class="mt-4 rounded-xl p-3 {{ $readyModuleCount > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">
                         <p class="text-xs font-semibold">{{ $readyModuleCount }} ready {{ Str::plural('module', $readyModuleCount) }}</p>
-                        <p class="mt-1 text-[10px] leading-4 opacity-80">{{ $readyModuleCount > 0 ? 'Matching passages will be cited below each answer.' : 'Answers will be general until your teacher uploads a module.' }}</p>
+                        <p class="mt-1 text-[10px] leading-4 opacity-80">{{ $readyModuleCount > 0 ? 'Teacher materials are available to support tutor answers.' : 'Answers will be general until your teacher uploads a module.' }}</p>
                     </div>
                 </div>
                 <div class="max-h-[510px] overflow-y-auto p-3">
@@ -56,19 +56,6 @@
                             @elseif ($message->role === 'assistant')
                                 <div class="max-w-3xl">
                                     <div class="rounded-2xl rounded-bl-md border border-slate-200 bg-white px-5 py-4 text-sm leading-7 text-slate-700 shadow-sm"><p class="whitespace-pre-line">{{ $message->content }}</p></div>
-                                    @if (! empty($message->retrieved_context))
-                                        <div class="mt-3 space-y-2">
-                                            <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-700">Sources retrieved from your teacher</p>
-                                            @foreach ($message->retrieved_context as $index => $source)
-                                                <details class="rounded-xl border border-emerald-100 bg-emerald-50/60 px-4 py-3">
-                                                    <summary class="cursor-pointer text-xs font-semibold text-emerald-800">[{{ $index + 1 }}] {{ data_get($source, 'module_title', 'Learning module') }} · {{ data_get($source, 'location', 'page '.data_get($source, 'page', '—')) }}</summary>
-                                                    <p class="mt-2 text-xs leading-5 text-slate-500">{{ data_get($source, 'excerpt') }}</p>
-                                                </details>
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <p class="mt-2 text-[10px] font-semibold uppercase tracking-wider text-amber-600">General explanation · no matching teacher passage</p>
-                                    @endif
                                 </div>
                             @endif
                         @endforeach

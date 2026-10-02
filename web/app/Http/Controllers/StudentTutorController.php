@@ -69,10 +69,8 @@ class StudentTutorController extends Controller
                 'conversation' => $answer['conversation']->id,
             ])
             ->with('status', match (true) {
-                $answer['result']->fallback && $answer['sources'] !== [] => 'The AI provider was unavailable; relevant teacher sources were saved for review.',
-                $answer['result']->fallback => 'The AI provider was unavailable, so fallback guidance was saved without source claims.',
-                $answer['sources'] !== [] => 'Tutor answer generated from teacher-uploaded learning material.',
-                default => 'No matching module passage was found; the answer is labeled as general guidance.',
+                $answer['result']->fallback => 'The AI provider was unavailable, so fallback guidance was saved.',
+                default => 'Tutor answer generated successfully.',
             });
     }
 }

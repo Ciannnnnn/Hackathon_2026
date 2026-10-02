@@ -165,7 +165,7 @@ The optional service URL is `http://localhost:5002`. Use `RAG_EXTRACTION_DRIVER=
 
 Phase 10 adds a student-only tutor at `/student/tutor`. Students can access only subjects in which they have an active enrollment. For every question, EduPulse searches text chunks from ready modules in the selected subject, ranks matching passages, and sends only the best passages, recent conversation history, and current question to Gemini.
 
-Tutor answers are persisted with their conversation. Grounded answers display separate source cards containing the teacher module title, PDF page, and a short source excerpt. If no relevant passage is found, the answer is explicitly labeled as general guidance and no fabricated source is attached. Retrieved PDF text is treated as untrusted reference content so instructions embedded inside a document cannot override the tutor's system rules.
+Tutor answers are persisted with their conversation. Teacher-material references are retained internally for grounding and audit but are not displayed in the student chat interface. If no relevant passage is found, the tutor can still provide general guidance without fabricating a source. Retrieved document text is treated as untrusted reference content so instructions embedded inside a document cannot override the tutor's system rules.
 
 Conversation access is student-scoped and subject-scoped. Students cannot open another learner's history, query an unenrolled subject, or retrieve passages across subject boundaries. The tutor can still use the configured demo fallback if Gemini is temporarily unavailable.
 
