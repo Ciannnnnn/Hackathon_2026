@@ -30,12 +30,6 @@ class StoreGeneratedQuizRequest extends FormRequest
             'topic' => ['required', 'string', 'max:160'],
             'difficulty' => ['required', Rule::in(['easy', 'medium', 'hard'])],
             'question_count' => ['required', 'integer', 'between:3,10'],
-            'is_published' => ['required', 'boolean'],
         ];
-    }
-
-    protected function prepareForValidation(): void
-    {
-        $this->merge(['is_published' => $this->boolean('is_published')]);
     }
 }

@@ -35,7 +35,6 @@ class GeneratedQuizTest extends TestCase
             'topic' => 'Normalization',
             'difficulty' => 'medium',
             'question_count' => 3,
-            'is_published' => '0',
         ]);
 
         $quiz = GeneratedQuiz::query()->with('questions')->sole();
@@ -83,7 +82,6 @@ class GeneratedQuizTest extends TestCase
             'topic' => 'Queues',
             'difficulty' => 'medium',
             'question_count' => 3,
-            'is_published' => '0',
         ]);
 
         $response->assertRedirect(route('teacher.quizzes.index', ['subject' => $subject->id]));
@@ -91,6 +89,7 @@ class GeneratedQuizTest extends TestCase
         $this->assertDatabaseCount('generated_quizzes', 0);
         Queue::assertPushed(GenerateGroundedQuiz::class, fn (GenerateGroundedQuiz $job): bool => $job->module->is($module)
             && $job->creator->is($teacherUser)
+            && $job->data['is_published'] === false
             && $job->queue === 'ai');
     }
 

@@ -28,13 +28,13 @@ class TeacherQuizController extends Controller
 
     public function store(StoreGeneratedQuizRequest $request): RedirectResponse
     {
-        $data = $request->validated();
+        $data = [...$request->validated(), 'is_published' => false];
         $module = LearningModule::findOrFail($data['module_id']);
 
         GenerateGroundedQuiz::dispatch($request->user(), $module, $data);
 
         $message = config('queue.default') === 'sync'
-            ? "{$data['title']} was generated".($data['is_published'] ? ' and published.' : ' as a draft.')
+            ? "{$data['title']} was generated as a draft."
             : "{$data['title']} is being generated in the background. Refresh this page shortly to review it.";
 
         return redirect()->route('teacher.quizzes.index', ['subject' => $module->subject_id])
