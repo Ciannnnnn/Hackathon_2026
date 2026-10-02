@@ -73,6 +73,7 @@ For a Laravel-only deployment, use:
 ML_SERVICE_ENABLED=false
 RAG_SERVICE_ENABLED=false
 RAG_EXTRACTION_DRIVER=local
+MAX_MODULE_SIZE_MB=10
 ```
 
 The rules fallback replaces the ML call. The `local` PDF extraction driver processes text-based PDFs directly inside Laravel, so new module uploads do not require a separate Python RAG deployment. Set `RAG_EXTRACTION_DRIVER=service` only when a reachable RAG service URL has been deployed.

@@ -6,6 +6,7 @@ use App\Models\LearningModule;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
+use App\Services\LocalDocxExtractionService;
 use App\Services\LocalPdfExtractionService;
 use App\Services\RagExtractionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -35,7 +36,7 @@ class TeacherModuleManagementTest extends TestCase
         $response = $this->actingAs($teacherUser)->post(route('teacher.modules.store'), [
             'subject_id' => $subject->id,
             'title' => 'Database Normalization',
-            'pdf' => UploadedFile::fake()->create('normalization.pdf', 120, 'application/pdf'),
+            'document' => UploadedFile::fake()->create('normalization.pdf', 120, 'application/pdf'),
         ]);
 
         $module = LearningModule::query()->sole();
@@ -66,7 +67,7 @@ class TeacherModuleManagementTest extends TestCase
         $this->actingAs($teacherUser)->post(route('teacher.modules.store'), [
             'subject_id' => $subject->id,
             'title' => 'Scanned Lesson',
-            'pdf' => UploadedFile::fake()->create('scan.pdf', 120, 'application/pdf'),
+            'document' => UploadedFile::fake()->create('scan.pdf', 120, 'application/pdf'),
         ])->assertSessionHasErrors('module');
 
         $module = LearningModule::query()->sole();
@@ -106,6 +107,41 @@ class TeacherModuleManagementTest extends TestCase
         $this->assertStringContainsString('Transactions group', $result['chunks'][0]['content']);
     }
 
+    public function test_teacher_can_upload_and_extract_a_docx_for_their_subject(): void
+    {
+        [$teacherUser, $subject] = $this->teacherSubject('DOCX');
+        $document = UploadedFile::fake()->createWithContent(
+            'relational-model.docx',
+            $this->docxWithText('A relational database organizes information into tables with related rows.'),
+        );
+
+        $response = $this->actingAs($teacherUser)->post(route('teacher.modules.store'), [
+            'subject_id' => $subject->id,
+            'title' => 'Relational Model',
+            'document' => $document,
+        ]);
+
+        $module = LearningModule::query()->with('chunks')->sole();
+        $response->assertRedirect(route('teacher.modules.index', ['subject' => $subject->id]))->assertSessionHas('status');
+        $this->assertSame('ready', $module->processing_status);
+        $this->assertSame('application/vnd.openxmlformats-officedocument.wordprocessingml.document', $module->mime_type);
+        $this->assertStringEndsWith('.docx', $module->stored_filename);
+        $this->assertStringContainsString('relational database', $module->chunks->first()->content);
+        Http::assertNothingSent();
+    }
+
+    public function test_laravel_native_docx_extractor_creates_numbered_sections(): void
+    {
+        $path = 'modules/native-test.docx';
+        Storage::disk('local')->put($path, $this->docxWithText('Word lessons can ground tutor answers and generated quizzes.'));
+
+        $result = app(LocalDocxExtractionService::class)->extract($path);
+
+        $this->assertSame(1, $result['page_count']);
+        $this->assertSame(1, $result['chunks'][0]['page_number']);
+        $this->assertStringContainsString('ground tutor answers', $result['chunks'][0]['content']);
+    }
+
     public function test_teacher_cannot_manage_another_teachers_module(): void
     {
         [$owner, $subject] = $this->teacherSubject('C');
@@ -118,7 +154,7 @@ class TeacherModuleManagementTest extends TestCase
         $this->assertDatabaseHas('modules', ['id' => $module->id]);
     }
 
-    public function test_pdf_upload_is_validated_and_must_target_an_owned_subject(): void
+    public function test_document_upload_is_validated_and_must_target_an_owned_subject(): void
     {
         [$teacherUser, $subject] = $this->teacherSubject('E');
         [, $outsideSubject] = $this->teacherSubject('F');
@@ -126,14 +162,14 @@ class TeacherModuleManagementTest extends TestCase
         $this->actingAs($teacherUser)->post(route('teacher.modules.store'), [
             'subject_id' => $outsideSubject->id,
             'title' => 'Unauthorized module',
-            'pdf' => UploadedFile::fake()->create('lesson.pdf', 50, 'application/pdf'),
+            'document' => UploadedFile::fake()->create('lesson.pdf', 50, 'application/pdf'),
         ])->assertForbidden();
 
         $this->actingAs($teacherUser)->post(route('teacher.modules.store'), [
             'subject_id' => $subject->id,
             'title' => '',
-            'pdf' => UploadedFile::fake()->create('lesson.txt', 50, 'text/plain'),
-        ])->assertSessionHasErrors(['title', 'pdf']);
+            'document' => UploadedFile::fake()->create('lesson.txt', 50, 'text/plain'),
+        ])->assertSessionHasErrors(['title', 'document']);
 
         $this->assertDatabaseCount('modules', 0);
     }
@@ -231,5 +267,25 @@ class TeacherModuleManagementTest extends TestCase
         }
 
         return $pdf."trailer\n<< /Size ".(count($objects) + 1)." /Root 1 0 R >>\nstartxref\n{$xref}\n%%EOF\n";
+    }
+
+    private function docxWithText(string $text): string
+    {
+        $content = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            .'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+            .'<w:body><w:p><w:r><w:t>'.htmlspecialchars($text, ENT_XML1 | ENT_QUOTES, 'UTF-8').'</w:t></w:r></w:p></w:body>'
+            .'</w:document>';
+        $filename = 'word/document.xml';
+        $crc = crc32($content);
+        $size = strlen($content);
+        $compressed = gzdeflate($content);
+        $compressedSize = strlen($compressed);
+        $nameLength = strlen($filename);
+        $local = pack('VvvvvvVVVvv', 0x04034B50, 20, 0, 8, 0, 0, $crc, $compressedSize, $size, $nameLength, 0)
+            .$filename.$compressed;
+        $central = pack('VvvvvvvVVVvvvvvVV', 0x02014B50, 20, 20, 0, 8, 0, 0, $crc, $compressedSize, $size, $nameLength, 0, 0, 0, 0, 0, 0)
+            .$filename;
+
+        return $local.$central.pack('VvvvvVVv', 0x06054B50, 0, 0, 1, 1, strlen($central), strlen($local), 0);
     }
 }

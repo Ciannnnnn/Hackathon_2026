@@ -32,10 +32,10 @@ class TutorService
         $sources = array_values(array_map(fn (array $match): array => $match['source'], $matches));
         $context = collect($matches)->map(
             fn (array $match, int $index): string => sprintf(
-                "[Source %d: %s, page %d]\n%s",
+                "[Source %d: %s, %s]\n%s",
                 $index + 1,
                 $match['source']['module_title'],
-                $match['source']['page'],
+                $match['source']['location'] ?? 'page '.$match['source']['page'],
                 $match['content'],
             ),
         )->implode("\n\n");

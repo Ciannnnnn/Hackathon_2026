@@ -61,7 +61,7 @@
                                             <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-700">Sources retrieved from your teacher</p>
                                             @foreach ($message->retrieved_context as $index => $source)
                                                 <details class="rounded-xl border border-emerald-100 bg-emerald-50/60 px-4 py-3">
-                                                    <summary class="cursor-pointer text-xs font-semibold text-emerald-800">[{{ $index + 1 }}] {{ data_get($source, 'module_title', 'Learning module') }} · page {{ data_get($source, 'page', '—') }}</summary>
+                                                    <summary class="cursor-pointer text-xs font-semibold text-emerald-800">[{{ $index + 1 }}] {{ data_get($source, 'module_title', 'Learning module') }} · {{ data_get($source, 'location', 'page '.data_get($source, 'page', '—')) }}</summary>
                                                     <p class="mt-2 text-xs leading-5 text-slate-500">{{ data_get($source, 'excerpt') }}</p>
                                                 </details>
                                             @endforeach

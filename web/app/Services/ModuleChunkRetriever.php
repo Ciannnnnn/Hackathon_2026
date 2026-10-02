@@ -25,6 +25,7 @@ class ModuleChunkRetriever
                 'module_chunks.page_number',
                 'module_chunks.content',
                 'modules.title as module_title',
+                'modules.mime_type as module_mime_type',
             ])
             ->join('modules', 'modules.id', '=', 'module_chunks.module_id')
             ->where('modules.subject_id', $subject->id)
@@ -60,6 +61,7 @@ class ModuleChunkRetriever
                         'module_title' => (string) $chunk->module_title,
                         'chunk_id' => (int) $chunk->id,
                         'page' => (int) $chunk->page_number,
+                        'location' => ($chunk->module_mime_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'section ' : 'page ').(int) $chunk->page_number,
                         'excerpt' => mb_substr(trim($chunk->content), 0, 240),
                     ],
                     'score' => (int) $score,

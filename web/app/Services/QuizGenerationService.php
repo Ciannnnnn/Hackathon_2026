@@ -24,9 +24,10 @@ class QuizGenerationService
         $contextParts = [];
         $includedChunkIds = [];
         $contextLength = 0;
+        $sourceUnit = $module->sourceUnit();
 
         foreach ($chunks as $chunk) {
-            $part = "[source_chunk_id={$chunk->id}; page={$chunk->page_number}]\n{$chunk->content}";
+            $part = "[source_chunk_id={$chunk->id}; {$sourceUnit}={$chunk->page_number}]\n{$chunk->content}";
             if ($contextParts !== [] && $contextLength + mb_strlen($part) > 18_000) {
                 break;
             }

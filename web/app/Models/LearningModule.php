@@ -57,4 +57,14 @@ class LearningModule extends Model
     {
         return $this->hasMany(GeneratedQuiz::class, 'module_id');
     }
+
+    public function isDocx(): bool
+    {
+        return $this->mime_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    }
+
+    public function sourceUnit(): string
+    {
+        return $this->isDocx() ? 'section' : 'page';
+    }
 }

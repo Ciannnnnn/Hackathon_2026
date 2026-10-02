@@ -37,13 +37,17 @@ class TeacherModuleController extends Controller
     {
         $validated = $request->validated();
         $teacher = $request->user()->teacher;
-        $file = $request->file('pdf');
-        $storedFilename = Str::uuid().'.pdf';
+        $file = $request->file('document');
+        $extension = strtolower($file->getClientOriginalExtension());
+        $mimeType = $extension === 'docx'
+            ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            : 'application/pdf';
+        $storedFilename = Str::uuid().'.'.$extension;
         $directory = "modules/{$teacher->id}/{$validated['subject_id']}";
         $path = $file->storeAs($directory, $storedFilename, 'local');
 
         if (! is_string($path)) {
-            return back()->withErrors(['pdf' => 'The PDF could not be stored. Please try again.'])->withInput();
+            return back()->withErrors(['document' => 'The document could not be stored. Please try again.'])->withInput();
         }
 
         $module = LearningModule::create([
@@ -53,7 +57,7 @@ class TeacherModuleController extends Controller
             'original_filename' => mb_substr(basename($file->getClientOriginalName()), 0, 255),
             'stored_filename' => $storedFilename,
             'file_path' => $path,
-            'mime_type' => 'application/pdf',
+            'mime_type' => $mimeType,
             'file_size_bytes' => $file->getSize(),
             'processing_status' => 'pending',
             'uploaded_at' => now(),
@@ -93,7 +97,7 @@ class TeacherModuleController extends Controller
         return Storage::disk('local')->download(
             $module->file_path,
             $module->original_filename,
-            ['Content-Type' => 'application/pdf', 'X-Content-Type-Options' => 'nosniff'],
+            ['Content-Type' => $module->mime_type, 'X-Content-Type-Options' => 'nosniff'],
         );
     }
 

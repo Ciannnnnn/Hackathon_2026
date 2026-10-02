@@ -16,7 +16,7 @@
                 <div class="flex items-start justify-between gap-4"><p class="text-sm font-semibold leading-6 text-slate-800">{{ $answer->question->position }}. {{ $answer->question->question_text }}</p><span class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase {{ $answer->is_correct ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700' }}">{{ $answer->is_correct ? 'Correct' : 'Review' }}</span></div>
                 <div class="mt-4 grid gap-3 text-xs sm:grid-cols-2"><div class="rounded-xl bg-slate-50 p-3"><p class="font-semibold text-slate-400">Your answer</p><p class="mt-1 text-slate-700">{{ $answer->answer_text !== '' ? $answer->answer_text : 'No answer' }}</p></div><div class="rounded-xl bg-emerald-50 p-3"><p class="font-semibold text-emerald-600">Correct answer</p><p class="mt-1 text-emerald-800">{{ $answer->question->correct_answer }}</p></div></div>
                 <p class="mt-4 text-xs leading-5 text-slate-500">{{ $answer->feedback }}</p>
-                @if ($answer->question->sourceChunk)<p class="mt-3 text-[10px] font-semibold uppercase tracking-wider text-indigo-500">Review {{ $answer->question->sourceChunk->module?->title }}, page {{ $answer->question->sourceChunk->page_number }}</p>@endif
+                @if ($answer->question->sourceChunk)<p class="mt-3 text-[10px] font-semibold uppercase tracking-wider text-indigo-500">Review {{ $answer->question->sourceChunk->module?->title }}, {{ $answer->question->sourceChunk->module?->sourceUnit() ?? 'page' }} {{ $answer->question->sourceChunk->page_number }}</p>@endif
             </article>
         @endforeach
     </section>

@@ -64,6 +64,7 @@ return [
         'url' => env('RAG_SERVICE_URL', 'http://localhost:5002'),
         'timeout' => (int) env('RAG_SERVICE_TIMEOUT', 20),
         'max_pdf_size_mb' => (int) env('MAX_PDF_SIZE_MB', 10),
+        'max_module_size_mb' => (int) env('MAX_MODULE_SIZE_MB', env('MAX_PDF_SIZE_MB', 10)),
     ],
 
 ];

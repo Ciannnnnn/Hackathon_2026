@@ -145,9 +145,9 @@ Refreshing insights archives the previous AI plan, replaces pending AI recommend
 
 ## PDF learning modules and extraction
 
-Phase 9 adds a teacher-only module library at `/teacher/modules`. Teachers select one of their assigned active subjects, upload a text-based PDF of up to `MAX_PDF_SIZE_MB`, and Laravel stores it outside the public web directory with a generated filename. The original filename is retained only for the authorized download response.
+Phase 9 adds a teacher-only module library at `/teacher/modules`. Teachers select one of their assigned active subjects, upload a text-based PDF or DOCX file of up to `MAX_MODULE_SIZE_MB`, and Laravel stores it outside the public web directory with a generated filename. The original filename is retained only for the authorized download response. Legacy `.doc` files require conversion to `.docx` before upload.
 
-By default, Laravel validates the private PDF, rejects damaged or image-only documents, extracts selectable text with the native PHP parser, and creates overlapping page-aware chunks. A separately deployed RAG service remains available through `RAG_EXTRACTION_DRIVER=service`, while `auto` tries that service before falling back to Laravel. Laravel validates remote responses before replacing stored chunks and marking the module ready. Failed files remain visible with a safe error and a retry action. Teachers cannot list, retry, download, or delete another teacher's modules.
+By default, Laravel validates private PDF and DOCX files, rejects damaged or empty documents, extracts selectable text, and creates overlapping grounded chunks. PDF chunks retain page numbers; DOCX chunks use numbered text sections because Word pagination depends on the rendering environment. A separately deployed RAG service remains available for PDFs through `RAG_EXTRACTION_DRIVER=service`, while DOCX extraction always runs inside Laravel. Failed files remain visible with a safe error and a retry action. Teachers cannot list, retry, download, or delete another teacher's modules.
 
 Start the RAG service in a separate terminal before uploading:
 

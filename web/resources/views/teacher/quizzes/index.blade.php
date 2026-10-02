@@ -59,7 +59,7 @@
                         <summary class="cursor-pointer text-xs font-semibold text-slate-600">Review questions and answer key</summary>
                         <ol class="mt-4 space-y-4">
                             @foreach ($quiz->questions as $question)
-                                <li class="rounded-xl border border-slate-200 bg-white p-4 text-sm"><p class="font-medium text-slate-800">{{ $question->position }}. {{ $question->question_text }}</p>@if ($question->choices)<p class="mt-2 text-xs text-slate-500">Choices: {{ implode(' · ', $question->choices) }}</p>@endif<p class="mt-3 text-xs font-semibold text-emerald-700">Answer: {{ $question->correct_answer }}</p><p class="mt-1 text-xs leading-5 text-slate-500">{{ $question->explanation }}</p><p class="mt-2 text-[10px] uppercase tracking-wider text-slate-400">Grounded in page {{ $question->sourceChunk?->page_number ?? 'unknown' }}</p></li>
+                                <li class="rounded-xl border border-slate-200 bg-white p-4 text-sm"><p class="font-medium text-slate-800">{{ $question->position }}. {{ $question->question_text }}</p>@if ($question->choices)<p class="mt-2 text-xs text-slate-500">Choices: {{ implode(' · ', $question->choices) }}</p>@endif<p class="mt-3 text-xs font-semibold text-emerald-700">Answer: {{ $question->correct_answer }}</p><p class="mt-1 text-xs leading-5 text-slate-500">{{ $question->explanation }}</p><p class="mt-2 text-[10px] uppercase tracking-wider text-slate-400">Grounded in {{ $quiz->module?->sourceUnit() ?? 'page' }} {{ $question->sourceChunk?->page_number ?? 'unknown' }}</p></li>
                             @endforeach
                         </ol>
                     </details>

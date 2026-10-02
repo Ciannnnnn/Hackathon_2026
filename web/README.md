@@ -94,19 +94,20 @@ From `/teacher/students/{student}`, an authorized teacher can generate or refres
 
 The generation route is teacher-only, verifies active class ownership, and is rate-limited. Refreshing archives prior AI plans and replaces only pending AI recommendations; teacher-authored and in-progress guidance is preserved. The active result is visible from both the teacher analysis page and student dashboard.
 
-## Phase 9 PDF modules and extraction
+## Phase 9 document modules and extraction
 
-Teachers manage subject learning materials at `/teacher/modules`. Uploads accept validated PDFs up to `MAX_PDF_SIZE_MB`, store them on Laravel's private local disk using generated names, and send them server-to-server to `POST {RAG_SERVICE_URL}/extract`. The original PDF is available only through the ownership-protected teacher download route.
+Teachers manage subject learning materials at `/teacher/modules`. Uploads accept validated PDF and DOCX files up to `MAX_MODULE_SIZE_MB`, store them on Laravel's private local disk using generated names, and expose the original document only through the ownership-protected teacher download route. Legacy `.doc` files must be converted to `.docx` first.
 
-The RAG service uses `pypdf` to extract selectable text and returns ordered chunks with source page numbers. Laravel validates and persists those chunks in `module_chunks`. Processing failures are recorded without leaking internals and can be retried from the module library. Encrypted and scanned image-only PDFs are rejected; OCR is not included in Phase 9.
+Laravel extracts PDFs into page-aware chunks and DOCX files into numbered text sections, then persists them in `module_chunks`. The optional Python RAG service can still process PDFs when configured; DOCX extraction remains local to Laravel. Processing failures are recorded without leaking internals and can be retried from the module library. Encrypted documents and scanned image-only PDFs are rejected; OCR is not included.
 
 Configure the integration in `.env`:
 
 ```env
-RAG_SERVICE_ENABLED=true
+RAG_SERVICE_ENABLED=false
 RAG_SERVICE_URL=http://localhost:5002
 RAG_SERVICE_TIMEOUT=20
-MAX_PDF_SIZE_MB=10
+RAG_EXTRACTION_DRIVER=local
+MAX_MODULE_SIZE_MB=10
 ```
 
 ## Phase 10 retrieval-augmented tutor

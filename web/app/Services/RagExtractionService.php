@@ -11,15 +11,22 @@ use Throwable;
 
 class RagExtractionService
 {
-    public function __construct(private readonly LocalPdfExtractionService $local) {}
+    public function __construct(
+        private readonly LocalPdfExtractionService $localPdf,
+        private readonly LocalDocxExtractionService $localDocx,
+    ) {}
 
     /** @return array{page_count: int, character_count: int, chunks: list<array{chunk_index: int, page_number: int, content: string, token_count: int}>} */
     public function extract(string $filePath, string $originalFilename): array
     {
+        if (strtolower(pathinfo($originalFilename, PATHINFO_EXTENSION)) === 'docx') {
+            return $this->localDocx->extract($filePath);
+        }
+
         $driver = (string) config('services.rag.driver', 'local');
 
         if ($driver === 'local') {
-            return $this->local->extract($filePath);
+            return $this->localPdf->extract($filePath);
         }
 
         if ($driver === 'auto') {
@@ -30,7 +37,7 @@ class RagExtractionService
                     'exception' => $exception::class,
                 ]);
 
-                return $this->local->extract($filePath);
+                return $this->localPdf->extract($filePath);
             }
         }
 
