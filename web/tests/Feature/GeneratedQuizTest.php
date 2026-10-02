@@ -54,7 +54,7 @@ class GeneratedQuizTest extends TestCase
         [$module] = $this->moduleWithChunk($subject, 'A primary key uniquely identifies a row.');
         $this->app->instance(GenerativeAiProvider::class, $this->quizProvider(999999));
 
-        $this->actingAs($teacherUser)->post(route('teacher.quizzes.store'), [
+        $response = $this->actingAs($teacherUser)->post(route('teacher.quizzes.store'), [
             'subject_id' => $subject->id,
             'module_id' => $module->id,
             'title' => 'Keys Review',
@@ -62,16 +62,16 @@ class GeneratedQuizTest extends TestCase
             'difficulty' => 'easy',
             'question_count' => 3,
             'is_published' => '1',
-        ])->assertSessionHasErrors('quiz');
+        ]);
 
+        $response->assertRedirect(route('teacher.quizzes.index', ['subject' => $subject->id]));
         $this->assertDatabaseCount('generated_quizzes', 0);
         $this->assertDatabaseCount('generated_quiz_questions', 0);
     }
 
-    public function test_production_queue_returns_before_generating_the_quiz(): void
+    public function test_quiz_generation_uses_the_deferred_connection_without_a_worker(): void
     {
         Queue::fake();
-        config(['queue.default' => 'database']);
         [$teacherUser, , $subject] = $this->teacherSubject('QUEUE');
         [$module] = $this->moduleWithChunk($subject, 'Queued generation should not block the web request.');
 
@@ -85,12 +85,13 @@ class GeneratedQuizTest extends TestCase
         ]);
 
         $response->assertRedirect(route('teacher.quizzes.index', ['subject' => $subject->id]));
-        $response->assertSessionHas('status', fn (string $message): bool => str_contains($message, 'background'));
+        $response->assertSessionHas('status', fn (string $message): bool => str_contains($message, 'Creating Queued Review'));
+        $response->assertSessionHas('pending_quiz_title', 'Queued Review');
         $this->assertDatabaseCount('generated_quizzes', 0);
         Queue::assertPushed(GenerateGroundedQuiz::class, fn (GenerateGroundedQuiz $job): bool => $job->module->is($module)
             && $job->creator->is($teacherUser)
             && $job->data['is_published'] === false
-            && $job->queue === 'ai');
+            && $job->connection === 'deferred');
     }
 
     public function test_enrolled_student_can_take_a_published_quiz_and_review_results(): void

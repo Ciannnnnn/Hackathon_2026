@@ -30,7 +30,7 @@
         <section class="dashboard-panel mt-7 overflow-hidden">
             <div class="border-b border-slate-100 px-5 py-5 sm:px-6">
                 <h2 class="font-semibold text-slate-900">Create a grounded quiz for {{ $selectedSubject->code }}</h2>
-                <p class="mt-1 text-xs leading-5 text-slate-400">Only ready modules with extracted text are available. Generation runs in the background in production, so you can safely leave or refresh this page.</p>
+                <p class="mt-1 text-xs leading-5 text-slate-400">Only ready modules with extracted text are available. Click Generate quiz once; Laravel continues the generation safely after returning the page.</p>
             </div>
             @if ($modules->isNotEmpty())
                 <form method="POST" action="{{ route('teacher.quizzes.store') }}" data-loading-form data-loading-text="Generating quiz…" class="grid gap-5 p-5 sm:grid-cols-2 sm:p-6 xl:grid-cols-6">
@@ -50,7 +50,7 @@
 
         <section class="mt-6 space-y-4">
             @forelse ($quizzes as $quiz)
-                <article class="dashboard-panel overflow-hidden">
+                <article class="dashboard-panel overflow-hidden" data-generated-quiz data-quiz-title="{{ $quiz->title }}">
                     <div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
                         <div><div class="flex flex-wrap items-center gap-2"><span class="rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-indigo-700">{{ $quiz->difficulty }}</span><span class="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider {{ $quiz->is_published ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ $quiz->is_published ? 'Published' : 'Draft' }}</span></div><h2 class="mt-3 text-lg font-semibold text-slate-900">{{ $quiz->title }}</h2><p class="mt-1 text-xs text-slate-400">{{ $quiz->topic }} · {{ $quiz->module?->title }} · {{ $quiz->question_count }} questions · {{ $quiz->attempts_count }} attempts</p></div>
                         <form method="POST" action="{{ route('teacher.quizzes.publish', $quiz) }}">@csrf @method('PATCH')<button class="rounded-xl px-4 py-2.5 text-xs font-semibold {{ $quiz->is_published ? 'bg-amber-50 text-amber-800 hover:bg-amber-100' : 'bg-emerald-600 text-white hover:bg-emerald-700' }}">{{ $quiz->is_published ? 'Return to draft' : 'Publish quiz' }}</button></form>
@@ -70,5 +70,41 @@
         </section>
     @else
         <section class="dashboard-panel mt-7 p-6"><x-empty-state title="No active subjects assigned" message="An administrator must assign a subject before you can generate quizzes." /></section>
+    @endif
+
+    @if (session('pending_quiz_title'))
+        <script>
+            (() => {
+                const expectedTitle = @js(session('pending_quiz_title'));
+                let attempts = 0;
+
+                const refreshWhenReady = async () => {
+                    attempts += 1;
+
+                    try {
+                        const response = await fetch(window.location.href, {
+                            cache: 'no-store',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        });
+                        const page = new DOMParser().parseFromString(await response.text(), 'text/html');
+                        const isReady = [...page.querySelectorAll('[data-generated-quiz]')]
+                            .some((quiz) => quiz.dataset.quizTitle === expectedTitle);
+
+                        if (isReady) {
+                            window.location.reload();
+                            return;
+                        }
+                    } catch (_) {
+                        // A temporary polling error should not interrupt generation.
+                    }
+
+                    if (attempts < 20) {
+                        window.setTimeout(refreshWhenReady, 3000);
+                    }
+                };
+
+                window.setTimeout(refreshWhenReady, 3000);
+            })();
+        </script>
     @endif
 @endsection

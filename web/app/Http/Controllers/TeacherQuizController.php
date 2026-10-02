@@ -33,12 +33,9 @@ class TeacherQuizController extends Controller
 
         GenerateGroundedQuiz::dispatch($request->user(), $module, $data);
 
-        $message = config('queue.default') === 'sync'
-            ? "{$data['title']} was generated as a draft."
-            : "{$data['title']} is being generated in the background. Refresh this page shortly to review it.";
-
         return redirect()->route('teacher.quizzes.index', ['subject' => $module->subject_id])
-            ->with('status', $message);
+            ->with('status', "Creating {$data['title']} now. This page will update automatically when the draft is ready.")
+            ->with('pending_quiz_title', $data['title']);
     }
 
     public function togglePublish(Request $request, GeneratedQuiz $quiz): RedirectResponse

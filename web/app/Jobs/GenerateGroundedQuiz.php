@@ -24,7 +24,7 @@ class GenerateGroundedQuiz implements ShouldQueue
         public readonly LearningModule $module,
         public readonly array $data,
     ) {
-        $this->onQueue('ai');
+        $this->onConnection('deferred');
     }
 
     public function handle(QuizGenerationService $generator): void
