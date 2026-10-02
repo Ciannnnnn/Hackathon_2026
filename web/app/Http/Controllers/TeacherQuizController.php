@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreGeneratedQuizRequest;
+use App\Http\Requests\UpdateGeneratedQuizQuestionRequest;
 use App\Jobs\GenerateGroundedQuiz;
 use App\Models\GeneratedQuiz;
+use App\Models\GeneratedQuizQuestion;
 use App\Models\LearningModule;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class TeacherQuizController extends Controller
@@ -44,6 +47,63 @@ class TeacherQuizController extends Controller
         $quiz->update(['is_published' => ! $quiz->is_published]);
 
         return back()->with('status', "{$quiz->title} is now ".($quiz->is_published ? 'published.' : 'a draft.'));
+    }
+
+    public function updateQuestion(
+        UpdateGeneratedQuizQuestionRequest $request,
+        GeneratedQuiz $quiz,
+        GeneratedQuizQuestion $question,
+    ): RedirectResponse {
+        $this->authorizeOwnership($request, $quiz);
+        abort_unless($question->quiz_id === $quiz->id, 404);
+
+        if ($quiz->is_published) {
+            throw ValidationException::withMessages(['question' => 'Return this quiz to draft before editing its questions.']);
+        }
+
+        if ($quiz->attempts()->exists()) {
+            throw ValidationException::withMessages(['question' => 'Questions cannot be edited after a student has attempted the quiz.']);
+        }
+
+        $data = $request->validated();
+        $choices = null;
+        $correctAnswer = trim($data['correct_answer']);
+
+        if ($question->question_type === 'multiple_choice') {
+            $choices = collect(preg_split('/\R/u', (string) ($data['choices'] ?? '')))
+                ->map(fn (string $choice): string => trim($choice))
+                ->filter()
+                ->unique(fn (string $choice): string => mb_strtolower($choice))
+                ->values();
+
+            if ($choices->count() < 2 || $choices->count() > 8) {
+                throw ValidationException::withMessages(['choices' => 'Multiple-choice questions require between 2 and 8 unique choices.']);
+            }
+
+            $matchingAnswer = $choices->first(fn (string $choice): bool => mb_strtolower($choice) === mb_strtolower($correctAnswer));
+            if (! is_string($matchingAnswer)) {
+                throw ValidationException::withMessages(['correct_answer' => 'The correct answer must exactly match one of the choices.']);
+            }
+
+            $correctAnswer = $matchingAnswer;
+            $choices = $choices->all();
+        } elseif ($question->question_type === 'true_false') {
+            if (! in_array(mb_strtolower($correctAnswer), ['true', 'false'], true)) {
+                throw ValidationException::withMessages(['correct_answer' => 'The answer must be True or False.']);
+            }
+
+            $correctAnswer = ucfirst(mb_strtolower($correctAnswer));
+            $choices = ['True', 'False'];
+        }
+
+        $question->update([
+            'question_text' => trim($data['question_text']),
+            'choices' => $choices,
+            'correct_answer' => $correctAnswer,
+            'explanation' => trim($data['explanation']),
+        ]);
+
+        return back()->with('status', "Question {$question->position} was updated.");
     }
 
     private function authorizeOwnership(Request $request, GeneratedQuiz $quiz): void

@@ -120,6 +120,94 @@ class GeneratedQuizTest extends TestCase
         $this->assertStringContainsString('Every question must use the true_false type.', $provider->prompt);
     }
 
+    public function test_teacher_can_edit_a_draft_question_and_answer_key(): void
+    {
+        [$teacherUser, , $subject] = $this->teacherSubject('EDIT');
+        [$module, $chunk] = $this->moduleWithChunk($subject, 'A key identifies a database record.');
+        $quiz = GeneratedQuiz::create([
+            'subject_id' => $subject->id,
+            'module_id' => $module->id,
+            'created_by_user_id' => $teacherUser->id,
+            'title' => 'Editable Keys Quiz',
+            'topic' => 'Keys',
+            'difficulty' => 'medium',
+            'question_count' => 1,
+            'is_published' => false,
+        ]);
+        $question = $quiz->questions()->create([
+            'position' => 1,
+            'question_type' => 'multiple_choice',
+            'question_text' => 'What is a key?',
+            'choices' => ['Old answer', 'Wrong answer'],
+            'correct_answer' => 'Old answer',
+            'explanation' => 'Old explanation.',
+            'source_chunk_id' => $chunk->id,
+        ]);
+
+        $response = $this->actingAs($teacherUser)->patch(route('teacher.quizzes.questions.update', [$quiz, $question]), [
+            'question_text' => 'What does a primary key identify?',
+            'choices' => "A unique database row\nA stylesheet\nA network port",
+            'correct_answer' => 'A unique database row',
+            'explanation' => 'A primary key uniquely identifies each row in a table.',
+        ]);
+
+        $response->assertRedirect()->assertSessionHas('status', 'Question 1 was updated.');
+        $question->refresh();
+        $this->assertSame('What does a primary key identify?', $question->question_text);
+        $this->assertSame(['A unique database row', 'A stylesheet', 'A network port'], $question->choices);
+        $this->assertSame('A unique database row', $question->correct_answer);
+        $this->assertSame('A primary key uniquely identifies each row in a table.', $question->explanation);
+        $this->assertSame($chunk->id, $question->source_chunk_id);
+    }
+
+    public function test_question_editing_enforces_ownership_draft_status_and_attempt_history(): void
+    {
+        [$owner, , $subject] = $this->teacherSubject('LOCK');
+        [$outsider] = $this->teacherSubject('OUT');
+        [$module, $chunk] = $this->moduleWithChunk($subject, 'Transactions are atomic.');
+        $quiz = GeneratedQuiz::create([
+            'subject_id' => $subject->id,
+            'module_id' => $module->id,
+            'created_by_user_id' => $owner->id,
+            'title' => 'Locked Quiz',
+            'topic' => 'Transactions',
+            'difficulty' => 'medium',
+            'question_count' => 1,
+            'is_published' => true,
+        ]);
+        $question = $quiz->questions()->create([
+            'position' => 1,
+            'question_type' => 'true_false',
+            'question_text' => 'Transactions are atomic.',
+            'choices' => ['True', 'False'],
+            'correct_answer' => 'True',
+            'explanation' => 'Atomicity is a transaction property.',
+            'source_chunk_id' => $chunk->id,
+        ]);
+        $changes = [
+            'question_text' => 'Edited statement.',
+            'choices' => '',
+            'correct_answer' => 'False',
+            'explanation' => 'Edited explanation.',
+        ];
+
+        $this->actingAs($outsider)->patch(route('teacher.quizzes.questions.update', [$quiz, $question]), $changes)->assertNotFound();
+        $this->actingAs($owner)->patch(route('teacher.quizzes.questions.update', [$quiz, $question]), $changes)->assertSessionHasErrors('question');
+
+        $quiz->update(['is_published' => false]);
+        [, $student] = $this->enrollStudent($subject, 'LOCK');
+        $quiz->attempts()->create([
+            'student_id' => $student->id,
+            'score' => 1,
+            'max_score' => 1,
+            'started_at' => now(),
+            'completed_at' => now(),
+        ]);
+
+        $this->actingAs($owner)->patch(route('teacher.quizzes.questions.update', [$quiz, $question]), $changes)->assertSessionHasErrors('question');
+        $this->assertSame('Transactions are atomic.', $question->fresh()->question_text);
+    }
+
     public function test_enrolled_student_can_take_a_published_quiz_and_review_results(): void
     {
         [$teacherUser, , $subject] = $this->teacherSubject('C');

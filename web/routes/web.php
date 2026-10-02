@@ -45,6 +45,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/quizzes', [TeacherQuizController::class, 'index'])->name('quizzes.index');
         Route::post('/quizzes', [TeacherQuizController::class, 'store'])->middleware('throttle:5,1')->name('quizzes.store');
         Route::patch('/quizzes/{quiz}/publish', [TeacherQuizController::class, 'togglePublish'])->name('quizzes.publish');
+        Route::patch('/quizzes/{quiz}/questions/{question}', [TeacherQuizController::class, 'updateQuestion'])->name('quizzes.questions.update');
         Route::get('/modules', [TeacherModuleController::class, 'index'])->name('modules.index');
         Route::post('/modules', [TeacherModuleController::class, 'store'])
             ->middleware('throttle:10,1')

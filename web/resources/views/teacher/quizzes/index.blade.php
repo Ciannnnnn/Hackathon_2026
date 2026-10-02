@@ -21,7 +21,7 @@
     @endif
     @if ($errors->any())
         <div class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800" role="alert">
-            <p class="font-semibold">The quiz could not be generated.</p>
+            <p class="font-semibold">The quiz request could not be completed.</p>
             <ul class="mt-2 list-disc space-y-1 pl-5 text-xs">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
         </div>
     @endif
@@ -60,7 +60,42 @@
                         <summary class="cursor-pointer text-xs font-semibold text-slate-600">Review questions and answer key</summary>
                         <ol class="mt-4 space-y-4">
                             @foreach ($quiz->questions as $question)
-                                <li class="rounded-xl border border-slate-200 bg-white p-4 text-sm"><div class="flex items-start justify-between gap-3"><p class="font-medium text-slate-800">{{ $question->position }}. {{ $question->question_text }}</p><span class="shrink-0 rounded-full bg-indigo-50 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-indigo-700">{{ str_replace('_', ' ', $question->question_type) }}</span></div>@if ($question->choices)<p class="mt-2 text-xs text-slate-500">Choices: {{ implode(' · ', $question->choices) }}</p>@endif<p class="mt-3 text-xs font-semibold text-emerald-700">Answer: {{ $question->correct_answer }}</p><p class="mt-1 text-xs leading-5 text-slate-500">{{ $question->explanation }}</p><p class="mt-2 text-[10px] uppercase tracking-wider text-slate-400">Grounded in {{ $quiz->module?->sourceUnit() ?? 'page' }} {{ $question->sourceChunk?->page_number ?? 'unknown' }}</p></li>
+                                <li class="rounded-xl border border-slate-200 bg-white p-4 text-sm">
+                                    <div class="flex items-start justify-between gap-3"><p class="font-medium text-slate-800">{{ $question->position }}. {{ $question->question_text }}</p><span class="shrink-0 rounded-full bg-indigo-50 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-indigo-700">{{ str_replace('_', ' ', $question->question_type) }}</span></div>
+                                    @if ($question->choices)<p class="mt-2 text-xs text-slate-500">Choices: {{ implode(' · ', $question->choices) }}</p>@endif
+                                    <p class="mt-3 text-xs font-semibold text-emerald-700">Answer: {{ $question->correct_answer }}</p>
+                                    <p class="mt-1 text-xs leading-5 text-slate-500">{{ $question->explanation }}</p>
+                                    <p class="mt-2 text-[10px] uppercase tracking-wider text-slate-400">Grounded in {{ $quiz->module?->sourceUnit() ?? 'page' }} {{ $question->sourceChunk?->page_number ?? 'unknown' }}</p>
+
+                                    @if (! $quiz->is_published && $quiz->attempts_count === 0)
+                                        <details class="mt-4 border-t border-slate-100 pt-3">
+                                            <summary class="cursor-pointer text-xs font-semibold text-indigo-600">Edit question and answer key</summary>
+                                            <form method="POST" action="{{ route('teacher.quizzes.questions.update', [$quiz, $question]) }}" class="mt-4 grid gap-4 sm:grid-cols-2">
+                                                @csrf
+                                                @method('PATCH')
+                                                <label class="block sm:col-span-2"><span class="text-xs font-semibold text-slate-600">Question</span><textarea name="question_text" rows="2" maxlength="1000" required class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-cyan-400 focus:bg-white">{{ $question->question_text }}</textarea></label>
+
+                                                @if ($question->question_type === 'multiple_choice')
+                                                    <label class="block"><span class="text-xs font-semibold text-slate-600">Choices</span><span class="mt-1 block text-[10px] text-slate-400">Enter one choice per line.</span><textarea name="choices" rows="5" maxlength="4000" required class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-cyan-400 focus:bg-white">{{ implode("\n", $question->choices ?? []) }}</textarea></label>
+                                                    <label class="block"><span class="text-xs font-semibold text-slate-600">Correct answer</span><span class="mt-1 block text-[10px] text-slate-400">Must match one choice.</span><input name="correct_answer" value="{{ $question->correct_answer }}" maxlength="500" required class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-cyan-400 focus:bg-white" /></label>
+                                                @elseif ($question->question_type === 'true_false')
+                                                    <input type="hidden" name="choices" value="" />
+                                                    <label class="block sm:col-span-2"><span class="text-xs font-semibold text-slate-600">Correct answer</span><select name="correct_answer" required class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm"><option value="True" @selected(strcasecmp($question->correct_answer, 'True') === 0)>True</option><option value="False" @selected(strcasecmp($question->correct_answer, 'False') === 0)>False</option></select></label>
+                                                @else
+                                                    <input type="hidden" name="choices" value="" />
+                                                    <label class="block sm:col-span-2"><span class="text-xs font-semibold text-slate-600">Correct answer</span><input name="correct_answer" value="{{ $question->correct_answer }}" maxlength="500" required class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-cyan-400 focus:bg-white" /></label>
+                                                @endif
+
+                                                <label class="block sm:col-span-2"><span class="text-xs font-semibold text-slate-600">Answer explanation</span><textarea name="explanation" rows="3" maxlength="2000" required class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-cyan-400 focus:bg-white">{{ $question->explanation }}</textarea></label>
+                                                <div class="sm:col-span-2"><button type="submit" class="rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-indigo-700">Save question</button></div>
+                                            </form>
+                                        </details>
+                                    @elseif ($quiz->attempts_count > 0)
+                                        <p class="mt-3 text-[10px] font-semibold text-slate-400">Editing is locked because this quiz has student attempts.</p>
+                                    @else
+                                        <p class="mt-3 text-[10px] font-semibold text-slate-400">Return the quiz to draft to edit this question.</p>
+                                    @endif
+                                </li>
                             @endforeach
                         </ol>
                     </details>
