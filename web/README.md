@@ -116,6 +116,10 @@ Actively enrolled students use `/student/tutor` to ask questions within a select
 
 Each assistant message stores only its actual source references and short excerpts in `retrieved_context` for internal grounding and audit. These records are not displayed in the student chat interface. When retrieval returns no match, `retrieved_context` remains null. Conversation and question requests verify student ownership, active enrollment, and subject consistency before retrieval or generation begins.
 
+## Phase 11 grounded AI quizzes
+
+Teachers choose a ready module, topic, difficulty, question count, and question type. Supported formats are multiple choice, true/false, short answer, and mixed. Laravel validates that Gemini returned the requested format and rejects malformed or ungrounded questions before saving the quiz as a draft.
+
 Run the test suite and code formatter with:
 
 ```powershell

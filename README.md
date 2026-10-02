@@ -171,7 +171,7 @@ Conversation access is student-scoped and subject-scoped. Students cannot open a
 
 ## Grounded AI quizzes
 
-Phase 11 adds a teacher quiz workspace at `/teacher/quizzes` and a student practice area at `/student/quizzes`. A teacher chooses a ready PDF module, topic, difficulty, and question count. Gemini must return the exact requested number of questions and cite the numeric source chunk supporting each one. EduPulse rejects incomplete questions, invalid answer choices, and source IDs that were not included in the prompt. Unlike explanatory features, quiz generation never saves demo fallback questions because an assessment must remain grounded in teacher material.
+Phase 11 adds a teacher quiz workspace at `/teacher/quizzes` and a student practice area at `/student/quizzes`. A teacher chooses a ready module, topic, difficulty, question count, and question type: multiple choice, true/false, short answer, or mixed. Gemini must return the exact requested number and type of questions and cite the numeric source chunk supporting each one. EduPulse rejects incomplete questions, mismatched types, invalid answer choices, and source IDs that were not included in the prompt. Unlike explanatory features, quiz generation never saves demo fallback questions because an assessment must remain grounded in teacher material.
 
 New quizzes can remain drafts while the teacher reviews the answer key, explanations, and source pages. Publishing makes the quiz available only to actively enrolled students in that subject. Student responses are graded immediately, saved as attempt history, and shown with correct answers, explanations, weak-topic guidance, and the module page to review. Drafts, other subjects, and another student's results are not accessible.
 

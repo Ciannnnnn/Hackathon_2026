@@ -38,14 +38,24 @@ class QuizGenerationService
         }
 
         $context = implode("\n\n", $contextParts);
-        $result = $this->ai->generateQuiz($context, (int) $data['question_count'], $data['difficulty']);
+        $result = $this->ai->generateQuiz(
+            $context,
+            (int) $data['question_count'],
+            $data['difficulty'],
+            $data['question_type'],
+        );
 
         if ($result->fallback) {
             throw ValidationException::withMessages(['quiz' => 'Gemini is unavailable, so a grounded quiz was not created. Please retry shortly.']);
         }
 
         $content = is_array($result->content) ? $result->content : [];
-        $questions = $this->validateQuestions($content['questions'] ?? null, $includedChunkIds, (int) $data['question_count']);
+        $questions = $this->validateQuestions(
+            $content['questions'] ?? null,
+            $includedChunkIds,
+            (int) $data['question_count'],
+            $data['question_type'],
+        );
 
         return DB::transaction(function () use ($creator, $module, $data, $questions): GeneratedQuiz {
             $quiz = GeneratedQuiz::create([
@@ -66,13 +76,13 @@ class QuizGenerationService
     }
 
     /** @return list<array<string, mixed>> */
-    private function validateQuestions(mixed $questions, array $chunkIds, int $expected): array
+    private function validateQuestions(mixed $questions, array $chunkIds, int $expected, string $requestedType): array
     {
         if (! is_array($questions) || count($questions) !== $expected) {
             throw ValidationException::withMessages(['quiz' => 'Gemini returned an incomplete quiz. Please retry.']);
         }
 
-        return collect(array_values($questions))->map(function ($question, int $index) use ($chunkIds): array {
+        $validated = collect(array_values($questions))->map(function ($question, int $index) use ($chunkIds, $requestedType): array {
             $type = is_array($question) ? ($question['type'] ?? null) : null;
             $text = is_array($question) ? trim((string) ($question['question'] ?? '')) : '';
             $answer = is_array($question) ? trim((string) ($question['correct_answer'] ?? '')) : '';
@@ -83,6 +93,7 @@ class QuizGenerationService
                 : [];
 
             if (! in_array($type, ['multiple_choice', 'true_false', 'short_answer'], true)
+                || ($requestedType !== 'mixed' && $type !== $requestedType)
                 || $text === '' || mb_strlen($text) > 1_000
                 || $answer === '' || mb_strlen($answer) > 500
                 || $explanation === '' || mb_strlen($explanation) > 2_000
@@ -91,6 +102,10 @@ class QuizGenerationService
             }
 
             if ($type === 'true_false') {
+                if (! in_array(mb_strtolower($answer), ['true', 'false'], true)) {
+                    throw ValidationException::withMessages(['quiz' => 'Gemini returned an invalid True/False answer. Please retry.']);
+                }
+
                 $choices = ['True', 'False'];
             }
 
@@ -108,5 +123,11 @@ class QuizGenerationService
                 'source_chunk_id' => $sourceId,
             ];
         })->all();
+
+        if ($requestedType === 'mixed' && collect($validated)->pluck('question_type')->unique()->count() < 2) {
+            throw ValidationException::withMessages(['quiz' => 'Gemini did not return the requested mix of question types. Please retry.']);
+        }
+
+        return $validated;
     }
 }

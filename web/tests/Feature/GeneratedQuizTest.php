@@ -34,6 +34,7 @@ class GeneratedQuizTest extends TestCase
             'title' => 'Normalization Review',
             'topic' => 'Normalization',
             'difficulty' => 'medium',
+            'question_type' => 'multiple_choice',
             'question_count' => 3,
         ]);
 
@@ -60,6 +61,7 @@ class GeneratedQuizTest extends TestCase
             'title' => 'Keys Review',
             'topic' => 'Keys',
             'difficulty' => 'easy',
+            'question_type' => 'multiple_choice',
             'question_count' => 3,
             'is_published' => '1',
         ]);
@@ -81,6 +83,7 @@ class GeneratedQuizTest extends TestCase
             'title' => 'Queued Review',
             'topic' => 'Queues',
             'difficulty' => 'medium',
+            'question_type' => 'multiple_choice',
             'question_count' => 3,
         ]);
 
@@ -92,6 +95,29 @@ class GeneratedQuizTest extends TestCase
             && $job->creator->is($teacherUser)
             && $job->data['is_published'] === false
             && $job->connection === 'deferred');
+    }
+
+    public function test_teacher_can_choose_the_generated_question_type(): void
+    {
+        [$teacherUser, , $subject] = $this->teacherSubject('TYPE');
+        [$module, $chunk] = $this->moduleWithChunk($subject, 'Transactions either commit or roll back.');
+        $provider = $this->quizProvider($chunk->id, 'true_false');
+        $this->app->instance(GenerativeAiProvider::class, $provider);
+
+        $this->actingAs($teacherUser)->post(route('teacher.quizzes.store'), [
+            'subject_id' => $subject->id,
+            'module_id' => $module->id,
+            'title' => 'Transaction Statements',
+            'topic' => 'Transactions',
+            'difficulty' => 'medium',
+            'question_type' => 'true_false',
+            'question_count' => 3,
+        ])->assertRedirect();
+
+        $quiz = GeneratedQuiz::query()->with('questions')->sole();
+        $this->assertTrue($quiz->questions->every(fn ($question): bool => $question->question_type === 'true_false'));
+        $this->assertTrue($quiz->questions->every(fn ($question): bool => $question->choices === ['True', 'False']));
+        $this->assertStringContainsString('Every question must use the true_false type.', $provider->prompt);
     }
 
     public function test_enrolled_student_can_take_a_published_quiz_and_review_results(): void
@@ -187,13 +213,16 @@ class GeneratedQuizTest extends TestCase
         return [$user, $student];
     }
 
-    private function quizProvider(int $sourceChunkId): GenerativeAiProvider
+    private function quizProvider(int $sourceChunkId, string $questionType = 'multiple_choice'): GenerativeAiProvider
     {
-        return new class($sourceChunkId) implements GenerativeAiProvider
+        return new class($sourceChunkId, $questionType) implements GenerativeAiProvider
         {
             public string $prompt = '';
 
-            public function __construct(private readonly int $sourceChunkId) {}
+            public function __construct(
+                private readonly int $sourceChunkId,
+                private readonly string $questionType,
+            ) {}
 
             public function generateText(string $systemInstruction, string $prompt): AiResult
             {
@@ -205,9 +234,9 @@ class GeneratedQuizTest extends TestCase
                 $this->prompt = $prompt;
                 $questions = collect(range(1, 3))->map(fn (int $position): array => [
                     'question' => "Grounded question {$position}?",
-                    'type' => 'multiple_choice',
-                    'choices' => ['Correct answer', 'Incorrect answer'],
-                    'correct_answer' => 'Correct answer',
+                    'type' => $this->questionType,
+                    'choices' => $this->questionType === 'true_false' ? ['True', 'False'] : ['Correct answer', 'Incorrect answer'],
+                    'correct_answer' => $this->questionType === 'true_false' ? 'True' : 'Correct answer',
                     'explanation' => 'The module supports this answer.',
                     'source_chunk_id' => $this->sourceChunkId,
                 ])->all();

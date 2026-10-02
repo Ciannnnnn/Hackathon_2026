@@ -29,6 +29,7 @@ class StoreGeneratedQuizRequest extends FormRequest
             'title' => ['required', 'string', 'max:180'],
             'topic' => ['required', 'string', 'max:160'],
             'difficulty' => ['required', Rule::in(['easy', 'medium', 'hard'])],
+            'question_type' => ['required', Rule::in(['multiple_choice', 'true_false', 'short_answer', 'mixed'])],
             'question_count' => ['required', 'integer', 'between:3,10'],
         ];
     }
