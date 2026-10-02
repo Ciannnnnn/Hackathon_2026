@@ -47,6 +47,23 @@ const showRoleFields = () => {
 accountRole?.addEventListener('change', showRoleFields);
 showRoleFields();
 
+document.querySelectorAll('[data-account-editor-toggle]').forEach((button) => {
+    button.addEventListener('click', () => {
+        const editorId = button.dataset.accountEditorToggle;
+        const editor = document.getElementById(editorId);
+        if (!editor) return;
+
+        const opening = editor.classList.contains('hidden');
+        editor.classList.toggle('hidden');
+
+        document.querySelectorAll(`[data-account-editor-toggle="${editorId}"]`).forEach((toggle) => {
+            toggle.setAttribute('aria-expanded', String(opening));
+        });
+
+        if (opening) editor.querySelector('input')?.focus();
+    });
+});
+
 document.querySelectorAll('[data-ai-generation-form]').forEach((form) => {
     form.addEventListener('submit', () => {
         const button = form.querySelector('[data-ai-generation-button]');

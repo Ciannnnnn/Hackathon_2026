@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use App\Services\AccountProvisioningService;
 use Illuminate\Http\RedirectResponse;
@@ -68,5 +69,18 @@ class AdminUserController extends Controller
             'status',
             "{$user->full_name}'s account is now ".($user->is_active ? 'active.' : 'inactive.'),
         );
+    }
+
+    public function update(UpdateUserRequest $request, User $user, AccountProvisioningService $accounts): RedirectResponse
+    {
+        $data = $request->validated();
+
+        if ($request->user()->is($user) && ! $data['is_active']) {
+            return back()->withErrors(['is_active' => 'You cannot deactivate your own administrator account.']);
+        }
+
+        $accounts->update($user, $data);
+
+        return back()->with('status', "{$user->fresh()->full_name}'s account details were updated.");
     }
 }

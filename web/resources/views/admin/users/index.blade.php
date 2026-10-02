@@ -5,7 +5,7 @@
         <div>
             <p class="text-sm font-semibold text-cyan-600">Administration</p>
             <h1 class="mt-1 text-3xl font-semibold tracking-tight text-slate-950">User accounts</h1>
-            <p class="mt-2 text-sm text-slate-500">Provision secure accounts and create the matching student or teacher profile.</p>
+            <p class="mt-2 text-sm text-slate-500">Create accounts, update user details, control access, and securely reset passwords.</p>
         </div>
         <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-cyan-200 hover:text-cyan-700"><x-icon name="dashboard" class="h-4 w-4" /> Admin overview</a>
     </div>
@@ -93,11 +93,64 @@
                                     <td class="px-4 py-4 text-sm text-slate-500">{{ $user->student?->student_number ?? $user->teacher?->employee_number ?? 'System account' }}</td>
                                     <td class="px-4 py-4"><span class="inline-flex items-center gap-1.5 text-xs font-semibold {{ $user->is_active ? 'text-emerald-700' : 'text-rose-600' }}"><span class="h-2 w-2 rounded-full {{ $user->is_active ? 'bg-emerald-500' : 'bg-rose-500' }}"></span>{{ $user->is_active ? 'Active' : 'Inactive' }}</span></td>
                                     <td class="px-6 py-4 text-right">
-                                        @if (auth()->user()->is($user))
-                                            <span class="text-xs font-medium text-slate-400">Current account</span>
-                                        @else
-                                            <form method="POST" action="{{ route('admin.users.status', $user) }}">@csrf @method('PATCH')<button class="rounded-lg px-3 py-2 text-xs font-semibold transition {{ $user->is_active ? 'bg-rose-50 text-rose-700 hover:bg-rose-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">{{ $user->is_active ? 'Deactivate' : 'Activate' }}</button></form>
-                                        @endif
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button type="button" data-account-editor-toggle="account-editor-{{ $user->id }}" aria-expanded="false" class="rounded-lg bg-cyan-50 px-3 py-2 text-xs font-semibold text-cyan-700 transition hover:bg-cyan-100">Edit</button>
+                                            @if (auth()->user()->is($user))
+                                                <span class="text-xs font-medium text-slate-400">Current account</span>
+                                            @else
+                                                <form method="POST" action="{{ route('admin.users.status', $user) }}">@csrf @method('PATCH')<button class="rounded-lg px-3 py-2 text-xs font-semibold transition {{ $user->is_active ? 'bg-rose-50 text-rose-700 hover:bg-rose-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">{{ $user->is_active ? 'Deactivate' : 'Activate' }}</button></form>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr id="account-editor-{{ $user->id }}" data-account-editor class="hidden bg-slate-50/70">
+                                    <td colspan="5" class="px-6 py-5">
+                                        <form method="POST" action="{{ route('admin.users.update', $user) }}" class="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                                            @csrf
+                                            @method('PATCH')
+                                            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                                <div>
+                                                    <h3 class="text-sm font-semibold text-slate-900">Edit {{ $user->full_name }}</h3>
+                                                    <p class="mt-1 text-xs text-slate-400">The role is fixed to protect related academic records. Leave password fields empty to keep the current password.</p>
+                                                </div>
+                                                <span class="self-start rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-indigo-700">{{ $user->role->value }}</span>
+                                            </div>
+
+                                            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                                                <label class="block"><span class="text-xs font-semibold text-slate-600">First name</span><input name="first_name" value="{{ $user->first_name }}" maxlength="80" required autocomplete="off" class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100" /></label>
+                                                <label class="block"><span class="text-xs font-semibold text-slate-600">Last name</span><input name="last_name" value="{{ $user->last_name }}" maxlength="80" required autocomplete="off" class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100" /></label>
+                                                <label class="block"><span class="text-xs font-semibold text-slate-600">Email address</span><input type="email" name="email" value="{{ $user->email }}" maxlength="191" required autocomplete="off" class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100" /></label>
+
+                                                @if ($user->role->value === 'student')
+                                                    <label class="block"><span class="text-xs font-semibold text-slate-600">Student number</span><input name="student_number" value="{{ $user->student?->student_number }}" maxlength="40" required class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100" /></label>
+                                                    <label class="block"><span class="text-xs font-semibold text-slate-600">Grade level</span><input name="grade_level" value="{{ $user->student?->grade_level }}" maxlength="40" required class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100" /></label>
+                                                    <label class="block"><span class="text-xs font-semibold text-slate-600">Program</span><input name="program" value="{{ $user->student?->program }}" maxlength="120" class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100" /></label>
+                                                    <label class="block"><span class="text-xs font-semibold text-slate-600">Guardian email</span><input type="email" name="guardian_email" value="{{ $user->student?->guardian_email }}" maxlength="191" class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100" /></label>
+                                                @elseif ($user->role->value === 'teacher')
+                                                    <label class="block"><span class="text-xs font-semibold text-slate-600">Employee number</span><input name="employee_number" value="{{ $user->teacher?->employee_number }}" maxlength="40" required class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100" /></label>
+                                                    <label class="block"><span class="text-xs font-semibold text-slate-600">Department</span><input name="department" value="{{ $user->teacher?->department }}" maxlength="120" class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100" /></label>
+                                                @endif
+                                            </div>
+
+                                            <div class="grid gap-4 md:grid-cols-2">
+                                                <label class="block"><span class="text-xs font-semibold text-slate-600">New password <span class="font-normal text-slate-400">(optional)</span></span><input type="password" name="password" autocomplete="new-password" class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100" /><span class="mt-1.5 block text-[11px] text-slate-400">At least 12 characters with uppercase, lowercase, and a number.</span></label>
+                                                <label class="block"><span class="text-xs font-semibold text-slate-600">Confirm new password</span><input type="password" name="password_confirmation" autocomplete="new-password" class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100" /></label>
+                                            </div>
+
+                                            <div class="flex flex-col gap-4 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                                                @if (auth()->user()->is($user))
+                                                    <input type="hidden" name="is_active" value="1" />
+                                                    <p class="text-xs font-medium text-slate-500">Your current administrator account must remain active.</p>
+                                                @else
+                                                    <input type="hidden" name="is_active" value="0" />
+                                                    <label class="flex items-center gap-3"><input type="checkbox" name="is_active" value="1" @checked($user->is_active) class="h-4 w-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500" /><span class="text-sm font-medium text-slate-700">Allow this account to sign in</span></label>
+                                                @endif
+                                                <div class="flex gap-2 sm:justify-end">
+                                                    <button type="button" data-account-editor-toggle="account-editor-{{ $user->id }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">Cancel</button>
+                                                    <button type="submit" class="rounded-xl bg-cyan-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-700">Save changes</button>
+                                                </div>
+                                            </div>
+                                        </form>
                                     </td>
                                 </tr>
                             @endforeach
@@ -110,4 +163,5 @@
             @endif
         </article>
     </section>
+
 @endsection
